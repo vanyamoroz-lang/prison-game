@@ -1,3 +1,4 @@
+import '../styles/yard.css';
 import { useState } from 'react';
 import GameChoiceModal from './gambling/GameChoiceModal';
 

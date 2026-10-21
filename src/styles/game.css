@@ -32,7 +32,7 @@ body { margin: 0; background: #2b1d14; font-family: Arial, sans-serif; }
 }
 .chip.wide { flex: 1.4; }
 
-/* сцена */
+/* сцена (обертка для компонентов вроде YardScene) */
 .scene {
   position: relative;
   display: flex;
@@ -46,30 +46,6 @@ body { margin: 0; background: #2b1d14; font-family: Arial, sans-serif; }
   min-width: 0;
   overflow: hidden;
 }
-.scene-bg {
-  position: absolute; inset: 0;
-  width: 100%; height: 100%;
-  object-fit: cover;
-}
-.scene-empty {
-  position: absolute; inset: 0;
-  display: grid; place-items: center;
-  color: #c89a3a; font-weight: bold;
-}
-
-/* персонаж: сидит на кровати */
-.character {
-  position: absolute; left: 50%; bottom: 0;
-  width: 100%; height: 92%;
-  transform: translateX(-50%);
-}
-.layer {
-  position: absolute; inset: 0;
-  width: 100%; height: 100%;
-  object-fit: contain;
-}
-
-
 
 /* правая панель */
 .location-panel {
@@ -98,40 +74,6 @@ body { margin: 0; background: #2b1d14; font-family: Arial, sans-serif; }
   border: 2px dashed #9a7a3a; border-radius: 6px;
 }
 
-.left-panel {
-  position: absolute; left: 6px; top: 8px;
-  display: flex; flex-direction: column; gap: 6px;
-}
-.side-btn {
-  width: 70px; padding: 6px 4px; cursor: pointer;
-  color: #fff; font-weight: bold; text-shadow: 1px 1px 0 #000;
-  background: linear-gradient(#8a2a1a, #4a0f08);
-  border: 2px solid #c89a3a; border-radius: 6px;
-}
-.side-btn:hover { filter: brightness(1.2); }
-
-.layer { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
-.hit { position: absolute; cursor: pointer; }
-.hit-face  { left: 35%; top: 2%;  width: 30%; height: 20%; }
-.hit-mouth { left: 42%; top: 18%; width: 16%; height: 6%; }
-
-/* облако у головы */
-.bubble {
-  position: absolute;
-  left: 62%; top: 0;
-  min-width: 120px; max-width: 180px;
-  padding: 10px 14px;
-  background: #fff; color: #000;
-  text-align: center; font-weight: bold; font-size: 14px;
-  border-radius: 50% / 45%;
-  cursor: pointer; word-break: break-word;
-  z-index: 5;
-}
-.bubble::before, .bubble::after {
-  content: ''; position: absolute; background: #fff; border-radius: 50%;
-}
-.bubble textarea { width: 100%; resize: none; border: 1px solid #999; }
-
 /* вкладки */
 .tabs {
   display: flex; gap: 8px; padding: 6px 10px;
@@ -158,6 +100,7 @@ body { margin: 0; background: #2b1d14; font-family: Arial, sans-serif; }
   height: 38px; display: grid; place-items: center;
   background: #333; border-radius: 4px; font-size: 22px;
 }
+
 /* ===== Зоны ===== */
 .zones-page {
   position: absolute; inset: 0;
@@ -254,60 +197,3 @@ body { margin: 0; background: #2b1d14; font-family: Arial, sans-serif; }
 .skull--common { filter: grayscale(1); }
 .skull--rare { filter: hue-rotate(30deg) saturate(2); }
 .skull--epic { filter: hue-rotate(-20deg) saturate(2); }
-
-.npc-catala-hotspot {
-  position: absolute;
-  left: 18%; top: 48%;
-  width: 10%; height: 18%;
-  background: transparent;
-  border: none; cursor: pointer;
-}
-.npc-icon-cards {
-  position: absolute;
-  left: 8.4%; top: 63%;
-  width: 36px; cursor: pointer;
-  animation: bounce 1.5s infinite;
-}
-@keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-4px)} }
-
-.modal-overlay {
-  position: absolute;
-  inset: 0;
-  background: rgba(0,0,0,.55);
-  display: flex; align-items: center; justify-content: center;
-  z-index: 100;
-}
-
-.catala-choice {
-  position: relative;
-  width: 70%;
-  max-width: 420px;
-}
-.catala-choice-img {
-  width: 100%;
-  display: block;
-}
-.catala-choice-close {
-  position: absolute;
-  top: -14px; right: -14px;
-  width: 28px; height: 28px;
-  border-radius: 50%;
-  background: #c00; color: #fff;
-  border: 2px solid #fff;
-  font-weight: bold; cursor: pointer;
-  z-index: 2;
-}
-.catala-choice-buttons {
-  position: absolute;
-  left: 0; right: 0;
-  top: 55%;
-  display: flex; justify-content: space-around;
-  padding: 0 120px;
-}
-.catala-choice-btn {
-  padding: 5px 10px;
-  font-weight: bold; cursor: pointer;
-  background: linear-gradient(#ffe36a, #d9a400);
-  border: 2px solid #7a4300; border-radius: 6px;
-}
-.catala-choice-btn:hover { filter: brightness(1.1); }
