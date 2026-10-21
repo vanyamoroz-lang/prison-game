@@ -1,96 +1,124 @@
-import { useState } from 'react';
-import { CATALA_COMBOS } from '../../data/catalaCombos';
+import { useState, useEffect } from 'react';
+import { api } from "../../api";
+import "../../styles/catala.css";
 
-interface CatalaState {
-  level: number;
-  xp: number;        // текущий опыт для полоски
-  xpToNext: number;
-  lastWinner: { name: string; avatar: string } | null;
-  shulmovkiLeft: number;
-  shulmovkiMax: number;
+interface CardData { rank: number; suit: number }
+
+interface GameState {
+  active: boolean;
+  hand?: CardData[];
+  swapsLeft?: number;
 }
 
-interface CardData { rank: string; suit: string; faceDown?: boolean }
-
 export default function CatalaPage() {
-  const [state] = useState<CatalaState>({
-    level: 106, xp: 60, xpToNext: 100,
-    lastWinner: { name: 'Игрок', avatar: '/assets/placeholder-avatar.png' },
-    shulmovkiLeft: 7, shulmovkiMax: 7,
-  });
+  const [gameState, setGameState] = useState<GameState | null>(null);
+  const [message, setMessage] = useState('');
+  const [rewardInfo, setRewardInfo] = useState<{ type: string; amount: number } | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  const [started, setStarted] = useState(false);
-  const [playerCards, setPlayerCards] = useState<CardData[]>([]);
-  const [resultModal, setResultModal] = useState<null | { reward: string }>(null);
+  const getRankName = (rank: number) => {
+    if (rank === 11) return 'J';
+    if (rank === 12) return 'Q';
+    if (rank === 13) return 'K';
+    if (rank === 14) return 'A';
+    return rank.toString();
+  };
+  const getSuitSymbol = (suit: number) => ['♣', '♦', '♥', '♠'][suit] || '?';
+  const isRed = (suit: number) => suit === 1 || suit === 2;
 
-  const handlePlay = async () => {
-    // TODO: const res = await api.post('/catala/play');
-    // setPlayerCards(res.cards); setStarted(true);
-    setStarted(true);
-    setPlayerCards([
-      { rank: '8', suit: 'hearts' },
-      { rank: '7', suit: 'hearts' },
-    ]);
+  useEffect(() => {
+    api('/api/pairgame')
+      .then((data: GameState) => setGameState(data))
+      .catch((err) => setMessage(err.message))
+      .finally(() => setLoading(false));
+  }, []);
+
+  const handleStart = async () => {
+    setMessage('Раздача...');
+    setRewardInfo(null);
+    try {
+      const data = await api('/api/pairgame/start', { method: 'POST' });
+      setGameState({ active: true, ...data });
+      setMessage('Выбери карту для замены или вскройся!');
+    } catch (err: any) {
+      setMessage(err.message);
+    }
   };
 
-  const handleReveal = async () => {
-    // TODO: const res = await api.post('/catala/reveal');
-    setResultModal({ reward: '10 000 ₽' });
+  const handleSwap = async (index: number) => {
+    if (!gameState || !gameState.swapsLeft || gameState.swapsLeft <= 0) return;
+    try {
+      const data = await api('/api/pairgame/swap', {
+        method: 'POST',
+        body: JSON.stringify({ position: index }),
+      });
+      setGameState((prev) => prev ? { ...prev, ...data } : null);
+      if (data.swapsLeft === 0) setMessage('Попытки кончились. Пора вскрываться!');
+    } catch (err: any) {
+      setMessage(err.message);
+    }
   };
+
+  const handleFinish = async () => {
+    setMessage('Загрузка...');
+    try {
+      const data = await api('/api/pairgame/finish', { method: 'POST' });
+      setGameState({ active: false, hand: data.hand });
+      setMessage(data.message);
+      setRewardInfo({ type: data.rewardType, amount: data.rewardAmount });
+    } catch (err: any) {
+      setMessage(err.message);
+    }
+  };
+
+  if (loading) return <div className="catala-loading">Загрузка стола...</div>;
 
   return (
     <div className="catala-page">
-      <div className="catala-level-bar">
-        <div className="level-label">{state.level} ур.</div>
-        <div className="level-track">
-          <div className="level-fill" style={{ height: `${(state.xp / state.xpToNext) * 100}%` }} />
-        </div>
-      </div>
+      <img className="catala-bg" src="/assets/bg/catala-table.png" alt="Стол" />
+
+      <button className="catala-btn-back" onClick={() => console.log('Назад')}>← Выйти</button>
 
       <div className="catala-table">
-        <div className="table-slot table-slot--dealer" />
-        <div className="table-slot table-slot--dealer" />
+        {/* Карты дилера (слева) */}
+        <div className="table-slot table-slot--dealer-1" />
+        <div className="table-slot table-slot--dealer-2" />
+
+        {/* Колода (в центре) */}
         <div className="table-slot table-slot--deck" />
-        {playerCards.map((c, i) => (
-          <div key={i} className="table-slot table-slot--player">
-            <img src={`/assets/cards/${c.rank}_${c.suit}.png`} alt="" />
+
+        {/* Карты игрока (справа). Класс формируется динамически (player-0, player-1) */}
+        {gameState?.active && gameState.hand?.map((card, i) => (
+          <div 
+            key={i} 
+            className={`table-slot table-slot--player-${i} pg-card ${isRed(card.suit) ? 'red' : 'black'}`}
+            onClick={() => handleSwap(i)}
+            style={{ cursor: gameState.swapsLeft && gameState.swapsLeft > 0 ? 'pointer' : 'default' }}
+          >
+            <div className="pg-card-value">{getRankName(card.rank)}</div>
+            <div className="pg-card-suit">{getSuitSymbol(card.suit)}</div>
           </div>
         ))}
-        {!started && (
-          <button className="catala-play-btn" onClick={handlePlay}>Играть</button>
-        )}
-        {started && (
+
+        {/* UI Взаимодействия */}
+        {!gameState?.active ? (
+          <button className="catala-play-btn" onClick={handleStart}>Начать игру</button>
+        ) : (
           <div className="catala-reveal-block">
-            <div className="shulmovki">Шульмовок {state.shulmovkiLeft} / {state.shulmovkiMax}</div>
-            <button className="catala-reveal-btn" onClick={handleReveal}>Вскрыться</button>
+            <div className="shulmovki">Шульмовок: {gameState.swapsLeft}</div>
+            <button className="catala-reveal-btn" onClick={handleFinish}>Вскрыться</button>
           </div>
         )}
       </div>
 
-      <div className="catala-side">
-        <div className="catala-winner">
-          <img src={state.lastWinner?.avatar} alt="" />
-          <div>Сорвал куш!</div>
-        </div>
-        <div className="catala-combos">
-          {CATALA_COMBOS.map((c) => (
-            <div key={c.key} className="combo-row">
-              <span className="combo-cards">{c.label}</span>
-              <span className="combo-reward">{c.amount}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {resultModal && (
-        <div className="modal-overlay">
-          <div className="result-modal">
-            <div>Победа!</div>
-            <div>{resultModal.reward}</div>
-            <button onClick={() => { setResultModal(null); setStarted(false); }}>Ништяк</button>
+      <div className="catala-message">
+        <div className="catala-message-text">{message}</div>
+        {rewardInfo && (
+          <div className="catala-reward">
+            Награда: {rewardInfo.type === 'money' ? 'Деньги' : 'Сигареты'} +{rewardInfo.amount}
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }
