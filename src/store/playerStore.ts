@@ -15,7 +15,7 @@ interface PlayerState {
   setFace: (n: number) => void;
   setMouth: (n: number) => void;
   setMessage: (s: string) => void;
-  location: 'cell' | 'yard' | 'zones' | 'bosses';
+  location: 'cell' | 'yard' | 'zones' | 'bosses' | 'catala' | 'poker' | 'catala' | 'poker';
   setLocation: (l: PlayerState['location']) => void;    
 }
 
