@@ -193,3 +193,18 @@
   height: 100%;
   background: #4caf50;
 }
+.fight-timer {
+  position: absolute;
+  top: 10px;
+  right: 20px;
+  background: rgba(0, 0, 0, 0.7);
+  color: #ffd700;
+  font-size: 24px;
+  font-weight: bold;
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: 2px solid #7a4300;
+  font-family: 'Courier New', monospace;
+  text-shadow: 1px 1px 0 #000;
+  z-index: 10;
+}

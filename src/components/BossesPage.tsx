@@ -90,19 +90,21 @@ export default function BossesPage() {
         const activeData = await activeRes.json();
         
         if (activeData.active) {
-          setActiveFight({
-            fight: {
-              bossId: activeData.bossId,
-              name: activeData.name,         // <-- ДОБАВЛЕНО
-              img_boss: activeData.img_boss, // <-- ДОБАВЛЕНО
-              currentHp: activeData.currentHp,
-              maxHp: activeData.maxHp
-            },
-            mode: activeData.mode || 'pazan'
-          });
-          setLoading(false);
-          return;
-        }
+        setActiveFight({
+        fight: {
+            bossId: activeData.bossId,
+            name: activeData.name,
+            img_boss: activeData.img_boss,
+            currentHp: activeData.currentHp,
+            maxHp: activeData.maxHp,
+            endTime: activeData.endTime,       // <--- ДОБАВИТЬ
+            serverTime: activeData.serverTime  // <--- ДОБАВИТЬ
+        },
+        mode: activeData.mode || 'pazan'
+        });
+  setLoading(false);
+  return;
+}
 
         const res = await fetch('/api/bosses');
         const data = await res.json();
