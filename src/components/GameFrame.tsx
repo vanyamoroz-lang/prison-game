@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+﻿import { useEffect, useRef, useState } from 'react';
 import TopBar from './TopBar';
 import BottomTabs from './BottomTabs';
 import FriendsStrip from './FriendsStrip';

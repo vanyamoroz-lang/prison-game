@@ -14,7 +14,6 @@ const BACKGROUNDS: Record<string, string | null> = {
   zones: null,
   bosses: null,
   poker: null,
-  // catala: null (можно добавить, если нужен общий фон)
 };
 
 export default function Scene() {
@@ -22,23 +21,17 @@ export default function Scene() {
   const setLocation = usePlayer((s) => s.setLocation);
   const bg = BACKGROUNDS[location];
   const showLeftPanel = location === 'cell';
-  
 
   return (
     <div className="scene">
       <div className="scene-view">      
         {location === 'cell' && <Character />}
-        
         {location === 'yard' && bg && <img key="yard" className="scene-bg" src={bg} alt="" />}
         {location === 'yard' && <YardScene />}
-
-        {/* 2. Добавляем рендер Каталы */}
         {location === 'catala' && <CatalaPage />}
         {location === 'poker' && <PokerPage onExit={() => setLocation('cell')} />}
-
         {location === 'zones' && <ZonesPage />}
         {location === 'bosses' && <BossesPage />}
-        
         {showLeftPanel && <LeftPanel />}
       </div>
       <LocationPanel />
