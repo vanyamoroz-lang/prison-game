@@ -88,40 +88,53 @@ export default function BossesPage() {
   const [fightResult, setFightResult] = useState<{ result: 'win' | 'lose', reward?: any, bossName: string } | null>(null);
 
   useEffect(() => {
-    async function initPage() {
-      try {
-        const activeRes = await fetch('/api/bosses/active');
-        const activeData = await activeRes.json();
-        
-        if (activeData.active) {
-          setActiveFight({
-            fight: {
-              bossId: activeData.bossId,
-              name: activeData.name,
-              img_boss: activeData.img_boss,
-              currentHp: activeData.currentHp,
-              maxHp: activeData.maxHp,
-              endTime: activeData.endTime,
-              serverTime: activeData.serverTime,
-              inventory: activeData.inventory // <--- ДОБАВИТЬ ИНВЕНТАРЬ
-            },
-            mode: activeData.mode || 'pazan'
-          });
-          setLoading(false);
-          return;
-        }
-
-        const res = await fetch('/api/bosses');
-        const data = await res.json();
-        setServerBosses(data.bosses || []);
-      } catch (err) {
-        console.error(err);
-      } finally {
+  async function initPage() {
+    try {
+      const activeRes = await fetch('/api/bosses/active');
+      const activeData = await activeRes.json();
+      
+      // 1. Если есть активный бой — открываем его
+      if (activeData.active) {
+        setActiveFight({
+          fight: {
+            bossId: activeData.bossId,
+            name: activeData.name,
+            img_boss: activeData.img_boss,
+            currentHp: activeData.currentHp,
+            maxHp: activeData.maxHp,
+            endTime: activeData.endTime,
+            serverTime: activeData.serverTime,
+            inventory: activeData.inventory
+          },
+          mode: activeData.mode || 'pazan'
+        });
         setLoading(false);
+        return;
       }
+
+      // 2. ЕСЛИ БОЯ НЕТ, НО ЕСТЬ РЕЗУЛЬТАТ (прошлый бой закончился)
+      if (activeData.result) {
+        setFightResult({
+          result: activeData.result, // 'win' или 'lose'
+          bossName: activeData.bossName || 'Босс', // Если сервер присылает имя
+          reward: activeData.reward || null // Если сервер присылает награду (для win)
+        });
+        setLoading(false);
+        return;
+      }
+
+      // 3. Если ничего нет — грузим витрину
+      const res = await fetch('/api/bosses');
+      const data = await res.json();
+      setServerBosses(data.bosses || []);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
     }
-    initPage();
-  }, []);
+  }
+  initPage();
+}, []);;
 
   const handleAttackClick = async (bossId: string) => {
     setLoadingLobby(true);
