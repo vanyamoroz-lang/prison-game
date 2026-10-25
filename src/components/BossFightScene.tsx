@@ -9,30 +9,32 @@ interface Props {
     currentHp: number;
     maxHp: number;
     endTime: number;
-    serverTime: number; // <--- ДОБАВИЛИ СЕРВЕРНОЕ ВРЕМЯ
+    serverTime: number;
+    inventory?: { knife: number; poison: number; pistol: number }; // <--- Добавили
   };
   mode: string;
-  onClose: () => void;
+  onClose: (result: 'win' | 'lose', reward?: any) => void; // <--- Изменили сигнатуру
 }
 
 export default function BossFightScene({ fight, mode, onClose }: Props) {
   const [currentHp, setCurrentHp] = useState(fight.currentHp);
   const [timeLeft, setTimeLeft] = useState<number>(0);
+  const [inventory, setInventory] = useState(
+    fight.inventory || { knife: 0, poison: 0, pistol: 0 }
+  );
+  const [isAttacking, setIsAttacking] = useState(false);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // === ЛОГИКА ТАЙМЕРА (НА ОСНОВЕ ВРЕМЕНИ СЕРВЕРА) ===
+  // === ТАЙМЕР ===
   useEffect(() => {
-    // Считаем начальное оставшееся время: (конец боя - серверное время) / 1000
     const initial = Math.max(0, Math.floor((fight.endTime - fight.serverTime) / 1000));
     setTimeLeft(initial);
 
-    // Запускаем интервал, который просто уменьшает число каждую секунду
     timerRef.current = setInterval(() => {
       setTimeLeft((prev) => {
         if (prev <= 1) {
           if (timerRef.current) clearInterval(timerRef.current);
-          alert('Время вышло! Вы проиграли.');
-          onClose();
+          onClose('lose'); // <--- Передаем поражение
           return 0;
         }
         return prev - 1;
@@ -59,13 +61,37 @@ export default function BossFightScene({ fight, mode, onClose }: Props) {
     return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
   };
 
-  const handleHit = (damage: number) => {
-    const newHp = Math.max(0, currentHp - damage);
-    setCurrentHp(newHp);
-    
-    if (newHp === 0) {
-      alert("Босс повержен!");
-      onClose();
+  // === УДАР ЧЕРЕЗ СЕРВЕР ===
+  const handleHit = async (weapon: 'knife' | 'poison' | 'pistol') => {
+    if (isAttacking) return;
+    if (inventory[weapon] <= 0) return; // Нет оружия — не бьем
+
+    setIsAttacking(true);
+
+    try {
+      const res = await fetch('/api/bosses/hit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ weapon }),
+        credentials: 'include'
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        // Босс убит
+        onClose('win', data.reward);
+      } else {
+        // Босс жив, обновляем HP и инвентарь
+        setCurrentHp(data.currentHp);
+        setInventory((prev) => ({
+          ...prev,
+          [weapon]: Math.max(0, prev[weapon] - 1)
+        }));
+      }
+    } catch (err) {
+      console.error('Ошибка удара:', err);
+    } finally {
+      setIsAttacking(false);
     }
   };
 
@@ -88,7 +114,6 @@ export default function BossFightScene({ fight, mode, onClose }: Props) {
           </div>
         </div>
 
-        {/* ТАЙМЕР БОЯ */}
         <div className="fight-timer">
           ⏳ {formatTime(timeLeft)}
         </div>
@@ -101,12 +126,42 @@ export default function BossFightScene({ fight, mode, onClose }: Props) {
 
       <div className="fight-bottom-panel">
         <div className="weapon-slots">
-          <div className="slot" onClick={() => handleHit(100)} title="Удар 100">🔪</div>
-          <div className="slot" onClick={() => handleHit(200)} title="Удар 200">🔫</div>
-          <div className="slot" onClick={() => handleHit(300)} title="Удар 300">💣</div>
-          <div className="slot">🗝️</div>
-          <div className="slot">💀</div>
-          <div className="slot">🛡️</div>
+          {/* Нож */}
+          <div 
+            className="slot" 
+            onClick={() => handleHit('knife')} 
+            style={{ opacity: inventory.knife > 0 ? 1 : 0.3, cursor: inventory.knife > 0 ? 'pointer' : 'not-allowed' }}
+            title="Удар финкой"
+          >
+            🔪 <span className="slot-count">{inventory.knife}</span>
+          </div>
+          {/* Пистолет */}
+          <div 
+            className="slot" 
+            onClick={() => handleHit('pistol')} 
+            style={{ opacity: inventory.pistol > 0 ? 1 : 0.3, cursor: inventory.pistol > 0 ? 'pointer' : 'not-allowed' }}
+            title="Выстрел из самопала"
+          >
+            🔫 <span className="slot-count">{inventory.pistol}</span>
+          </div>
+          {/* Яд */}
+          <div 
+            className="slot" 
+            onClick={() => handleHit('poison')} 
+            style={{ opacity: inventory.poison > 0 ? 1 : 0.3, cursor: inventory.poison > 0 ? 'pointer' : 'not-allowed' }}
+            title="Удар ядом"
+          >
+            💣 <span className="slot-count">{inventory.poison}</span>
+          </div>
+          {/* Кнопка сдаться */}
+          <div 
+            className="slot" 
+            onClick={() => onClose('lose')} 
+            title="Сдаться"
+            style={{ marginLeft: 'auto', background: '#500', borderColor: '#a00' }}
+          >
+            🏳️
+          </div>
         </div>
 
         <div className="talents-panel">

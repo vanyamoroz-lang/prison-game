@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import BossLobby from './BossLobby'; 
 import type { BossDetails } from './BossLobby';
 import BossFightScene from './BossFightScene';
+import BossResultScene from './BossResultScene'; // <--- ДОБАВИТЬ ИМПОРТ
 
 export interface BossReward {
   cigarettes: number;
@@ -82,6 +83,9 @@ export default function BossesPage() {
   const [lobbyBoss, setLobbyBoss] = useState<BossDetails | null>(null);
   const [activeFight, setActiveFight] = useState<{ fight: any, mode: string } | null>(null);
   const [loadingLobby, setLoadingLobby] = useState(false);
+  
+  // ДОБАВЛЯЕМ СОСТОЯНИЕ ДЛЯ РЕЗУЛЬТАТА БОЯ
+  const [fightResult, setFightResult] = useState<{ result: 'win' | 'lose', reward?: any, bossName: string } | null>(null);
 
   useEffect(() => {
     async function initPage() {
@@ -90,21 +94,22 @@ export default function BossesPage() {
         const activeData = await activeRes.json();
         
         if (activeData.active) {
-        setActiveFight({
-        fight: {
-            bossId: activeData.bossId,
-            name: activeData.name,
-            img_boss: activeData.img_boss,
-            currentHp: activeData.currentHp,
-            maxHp: activeData.maxHp,
-            endTime: activeData.endTime,       // <--- ДОБАВИТЬ
-            serverTime: activeData.serverTime  // <--- ДОБАВИТЬ
-        },
-        mode: activeData.mode || 'pazan'
-        });
-  setLoading(false);
-  return;
-}
+          setActiveFight({
+            fight: {
+              bossId: activeData.bossId,
+              name: activeData.name,
+              img_boss: activeData.img_boss,
+              currentHp: activeData.currentHp,
+              maxHp: activeData.maxHp,
+              endTime: activeData.endTime,
+              serverTime: activeData.serverTime,
+              inventory: activeData.inventory // <--- ДОБАВИТЬ ИНВЕНТАРЬ
+            },
+            mode: activeData.mode || 'pazan'
+          });
+          setLoading(false);
+          return;
+        }
 
         const res = await fetch('/api/bosses');
         const data = await res.json();
@@ -152,14 +157,31 @@ export default function BossesPage() {
     };
   });
 
+  // 0. ЭКРАН РЕЗУЛЬТАТА БОЯ
+  if (fightResult) {
+    return (
+      <BossResultScene 
+        result={fightResult.result}
+        bossName={fightResult.bossName}
+        reward={fightResult.reward}
+        onClose={() => setFightResult(null)}
+      />
+    );
+  }
+
   // 1. Сцена боя
   if (activeFight) {
     return (
       <BossFightScene 
         fight={activeFight.fight} 
         mode={activeFight.mode} 
-        onClose={() => {
+        onClose={(result, reward) => {
           setActiveFight(null);
+          setFightResult({
+            result,
+            reward,
+            bossName: activeFight.fight.name
+          });
         }} 
       />
     );
@@ -176,8 +198,9 @@ export default function BossesPage() {
           setActiveFight({ 
             fight: { 
               ...fightData, 
-              name: lobbyBoss.name,          // <-- ДОБАВЛЕНО
-              img_boss: lobbyBoss.img_boss   // <-- ДОБАВЛЕНО
+              name: lobbyBoss.name,
+              img_boss: lobbyBoss.img_boss,
+              inventory: fightData.inventory // <--- ДОБАВИТЬ ИНВЕНТАРЬ (если сервер его вернул)
             }, 
             mode 
           });
