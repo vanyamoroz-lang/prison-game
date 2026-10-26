@@ -23,21 +23,31 @@ interface FinishResult {
 }
 
 const REWARD_META: Record<string, { title: string; icon: string }> = {
-  money: { title: 'рублей', icon: '₽' },
   rubles: { title: 'рублей', icon: '₽' },
-  rub: { title: 'рублей', icon: '₽' },
-  cigarettes: { title: 'сигарет', icon: '🚬' },
-  key: { title: 'ключей', icon: '🗝️' },
-  keys: { title: 'ключей', icon: '🗝️' },
-  finka: { title: 'финок', icon: '🔪' },
-  pal: { title: 'палок', icon: '🏏' },
-  poison: { title: 'яда', icon: '🧪' },
-  chips: { title: 'фишек', icon: '🪙' },
-  matches: { title: 'спичек', icon: '🔥' },
+  cigarettes: { title: 'сигарет', icon: '/assets/icons/smoke1.png' }
 };
 
 const asRecord = (value: unknown): Record<string, unknown> | null =>
   value !== null && typeof value === 'object' ? (value as Record<string, unknown>) : null;
+
+const CIGARETTE_ICON = '/assets/icons/smoke1.png';
+
+// Строки сверху вниз, как на картинке. Последняя строка (рубашки) — скрытая комбинация.
+const COMBO_ROWS: { key: string; label: string; reward: number | null }[] = [
+  { key: 'A',    label: 'A',  reward: 2500 },
+  { key: 'K',    label: 'K',  reward: 2000 },
+  { key: 'Q',    label: 'Q',  reward: 1500 },
+  { key: 'J',    label: 'J',  reward: 1000 },
+  { key: '10',   label: '10', reward: 800 },
+  { key: '9',    label: '9',  reward: 700 },
+  { key: '8',    label: '8',  reward: 500 },
+  { key: '7',    label: '7',  reward: 300 },
+  { key: 'back', label: '',   reward: 100 },
+];
+
+// Положение строк в процентах от высоты фона
+const ROW_TOP_START = 26;
+const ROW_STEP = 8.3;
 
 const toNumber = (value: unknown): number | undefined => {
   if (value === null || value === undefined || value === '') return undefined;
@@ -59,7 +69,6 @@ const parseFinishResult = (raw: unknown): FinishResult => {
   }
 
   const reward = asRecord(data.reward) ?? {};
-
   const rewardType =
     toStringOrNull(data.rewardType) ??
     toStringOrNull(data.reward_type) ??
@@ -103,6 +112,13 @@ const parseFinishResult = (raw: unknown): FinishResult => {
 
 const getRewardMeta = (type: string | null) =>
   type ? REWARD_META[type] ?? { title: type, icon: '🎁' } : null;
+
+const renderRewardIcon = (icon: string) =>
+  icon.startsWith('/') ? (
+    <img src={icon} alt="" className="catala-reward-img" />
+  ) : (
+    <span>{icon}</span>
+  );
 
 export default function CatalaPage() {
   const setLocation = usePlayer((s) => s.setLocation);
@@ -204,8 +220,30 @@ export default function CatalaPage() {
 
   return (
     <div className="catala-page">
-      <img className="catala-bg" src="/assets/bg/catala-table.png" alt="Стол" />
-
+      <img className="catala-bg" src="/assets/bg/catala-table1.png" alt="Стол" />
+      <div className="catala-combos" aria-hidden="true">
+  {COMBO_ROWS.map((row, i) => (
+    <div
+      key={row.key}
+      className="catala-combo-row"
+      style={{ top: `${ROW_TOP_START + i * ROW_STEP}%` }}
+    >
+      {row.reward !== null ? (
+        <>
+          <span className="catala-combo-icon">{renderRewardIcon(CIGARETTE_ICON)}</span>
+          <span className="catala-combo-amount">
+            {row.reward.toLocaleString('ru-RU')}
+          </span>
+        </>
+      ) : (
+        <span className="catala-combo-amount catala-combo-amount--empty">—</span>
+      )}
+    </div>
+  ))}
+</div>
+      <div className="catala-jackpot" role="status">
+  СОРВАЛ КУШ!
+</div>
       <button className="catala-btn-back" onClick={exitToYard}>
         ← Выйти
       </button>
@@ -278,7 +316,7 @@ export default function CatalaPage() {
 
             {showReward && rewardMeta && (
               <div className="catala-result-reward">
-                <span className="catala-result-reward-icon">{rewardMeta.icon}</span>
+                <span className="catala-result-reward-icon">{renderRewardIcon(rewardMeta.icon)}</span>
                 <span>
                   +{result.rewardAmount.toLocaleString('ru-RU')} {rewardMeta.title}
                 </span>

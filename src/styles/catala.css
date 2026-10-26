@@ -52,19 +52,19 @@
 /* Карты игрока */
 .table-slot--player-0 { 
   top: 45%; 
-  left: 39%; 
+  left: 23%; 
 }
 
 .table-slot--player-1 { 
   top: 45%; 
-  left: 51%; 
+  left: 37%; 
 }
 
 /* Кнопка "Начать игру" (по центру) */
 .catala-play-btn {
   position: absolute;
-  top: 50%;
-  left: 50%;
+  top: 86%;
+  left: 35%;
   transform: translate(-50%, -50%);
   padding: 10px 20px;
   font-size: 20px;
@@ -101,7 +101,7 @@
 .catala-reveal-block {
   position: absolute;
   bottom: 4%;
-  left: 50%;
+  left: 36%;
   transform: translateX(-50%);
   display: flex;
   flex-direction: column;
@@ -333,3 +333,72 @@
 .frame--phone .catala-reveal-block { bottom: 2%; }
 .frame--phone .catala-play-btn { font-size: 16px; padding: 8px 14px; }
 .frame--phone .catala-result-title { font-size: 22px; }
+
+/* награда за комбинации */
+.catala-reward-img {
+  width: 1.2em;
+  height: 1.2em;
+  object-fit: contain;
+  vertical-align: middle;
+}
+
+.catala-combos {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.catala-combo-row {
+  position: absolute;
+  left: 87%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0;
+  background: none;
+  border: none;
+  box-shadow: none;
+  color: #3a2410;
+  font-weight: 700;
+  font-size: clamp(11px, 1.4vw, 15px);
+  white-space: nowrap;
+}
+
+.catala-combo-icon img {
+  width: 1.2em;
+  height: 1.2em;
+  object-fit: contain;
+  vertical-align: middle;
+}
+
+.catala-combo-amount--empty {
+  opacity: 0.5;
+}
+
+.catala-jackpot {
+  position: absolute;
+  top: 6%;
+  right: 1.5%;
+  z-index: 6;
+  padding: 2px 6px;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: clamp(12px, 1.6vw, 12px);
+  font-weight: 900;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: #ffd84a;
+  white-space: nowrap;
+  text-shadow:
+    0 0 4px #ff8a00,
+    0 0 8px #ff5a00,
+    0 2px 0 #5a2a00;
+  animation: catala-jackpot-pulse 1.4s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes catala-jackpot-pulse {
+  0%, 100% { transform: rotate(16deg) scale(1); }
+  50%      { transform: rotate(-16deg) scale(1.08); }
+}
