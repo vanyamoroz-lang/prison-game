@@ -10,10 +10,10 @@ interface Props {
     maxHp: number;
     endTime: number;
     serverTime: number;
-    inventory?: { knife: number; poison: number; pistol: number }; // <--- Добавили
+    inventory?: { knife: number; poison: number; pistol: number };
   };
   mode: string;
-  onClose: (result: 'win' | 'lose', reward?: any) => void; // <--- Изменили сигнатуру
+  onClose: (result: 'win' | 'lose', reward?: any) => void;
 }
 
 export default function BossFightScene({ fight, mode, onClose }: Props) {
@@ -34,7 +34,7 @@ export default function BossFightScene({ fight, mode, onClose }: Props) {
       setTimeLeft((prev) => {
         if (prev <= 1) {
           if (timerRef.current) clearInterval(timerRef.current);
-          onClose('lose'); // <--- Передаем поражение
+          onClose('lose');
           return 0;
         }
         return prev - 1;
@@ -64,7 +64,7 @@ export default function BossFightScene({ fight, mode, onClose }: Props) {
   // === УДАР ЧЕРЕЗ СЕРВЕР ===
   const handleHit = async (weapon: 'knife' | 'poison' | 'pistol') => {
     if (isAttacking) return;
-    if (inventory[weapon] <= 0) return; // Нет оружия — не бьем
+    if (inventory[weapon] <= 0) return;
 
     setIsAttacking(true);
 
@@ -78,10 +78,8 @@ export default function BossFightScene({ fight, mode, onClose }: Props) {
       const data = await res.json();
 
       if (data.success) {
-        // Босс убит
         onClose('win', data.reward);
       } else {
-        // Босс жив, обновляем HP и инвентарь
         setCurrentHp(data.currentHp);
         setInventory((prev) => ({
           ...prev,
@@ -133,7 +131,8 @@ export default function BossFightScene({ fight, mode, onClose }: Props) {
             style={{ opacity: inventory.knife > 0 ? 1 : 0.3, cursor: inventory.knife > 0 ? 'pointer' : 'not-allowed' }}
             title="Удар финкой"
           >
-            🔪 <span className="slot-count">{inventory.knife}</span>
+            <img src="/assets/icons/knife.png" alt="knife" className="slot-icon" />
+            <span className="slot-count">{inventory.knife}</span>
           </div>
           {/* Пистолет */}
           <div 
@@ -142,7 +141,8 @@ export default function BossFightScene({ fight, mode, onClose }: Props) {
             style={{ opacity: inventory.pistol > 0 ? 1 : 0.3, cursor: inventory.pistol > 0 ? 'pointer' : 'not-allowed' }}
             title="Выстрел из самопала"
           >
-            🔫 <span className="slot-count">{inventory.pistol}</span>
+            <img src="/assets/icons/gun.png" alt="gun" className="slot-icon" />
+            <span className="slot-count">{inventory.pistol}</span>
           </div>
           {/* Яд */}
           <div 
@@ -151,7 +151,8 @@ export default function BossFightScene({ fight, mode, onClose }: Props) {
             style={{ opacity: inventory.poison > 0 ? 1 : 0.3, cursor: inventory.poison > 0 ? 'pointer' : 'not-allowed' }}
             title="Удар ядом"
           >
-            💣 <span className="slot-count">{inventory.poison}</span>
+            <img src="/assets/icons/poison.png" alt="poison" className="slot-icon" />
+            <span className="slot-count">{inventory.poison}</span>
           </div>
           {/* Кнопка сдаться */}
           <div 

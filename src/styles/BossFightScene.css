@@ -130,7 +130,6 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  font-size: 24px;
   cursor: pointer;
   box-shadow: inset 0 0 10px #000;
   transition: 0.1s;
@@ -147,6 +146,14 @@
 
 .slot:active {
   transform: scale(0.95);
+}
+
+/* === ИКОНКИ ОРУЖИЯ ВНУТРИ СЛОТОВ === */
+.slot-icon {
+  width: 60px;
+  height: 60px;
+  object-fit: contain; /* Сохраняет пропорции картинки */
+  pointer-events: none; /* Чтобы клик шел по слоту, а не по картинке */
 }
 
 /* === СЧЕТЧИК ОРУЖИЯ НА СЛОТЕ === */
