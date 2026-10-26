@@ -1,0 +1,315 @@
+/* =========================================
+   Витрина боссов — карточки на панели
+   Панель: public/assets/bosspanel.png (2172×724)
+   Зоны панели:
+     слева  — тёмное окно под аватар
+     центр  — пергамент «НАГРАДА»
+     справа — металл под имя/статы/кнопку
+   ========================================= */
+
+.scene .bosses-page {
+  background:
+    radial-gradient(circle at 50% -10%, rgba(116, 140, 88, 0.32), transparent 60%),
+    linear-gradient(#1b2117, #0e120c);
+}
+
+/* --- Вкладки --- */
+.bosses-page .bosses-tabs {
+  flex-shrink: 0;
+  background: linear-gradient(#2c2418, #17120c);
+  border-bottom: 2px solid #5a4a2a;
+}
+
+.bosses-page .bosses-tab {
+  padding: 9px 8px;
+  color: #c9b98d;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  transition: color 0.15s ease, background 0.15s ease;
+}
+
+.bosses-page .bosses-tab:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.bosses-page .bosses-tab.active {
+  color: #ffe08a;
+  background: linear-gradient(rgba(150, 110, 30, 0.35), rgba(0, 0, 0, 0.1));
+  border-bottom-color: #d9a400;
+}
+
+/* --- Список --- */
+.bosses-page .bosses-list {
+  padding: 10px 12px 16px;
+  gap: 10px;
+}
+
+/* --- Карточка --- */
+.bosses-page .boss-card {
+  position: relative;
+  display: block;
+  width: 100%;
+  padding: 0;
+  flex-shrink: 0;
+  aspect-ratio: 2172 / 724;
+  background: url('/assets/bosspanel.png') center / 100% 100% no-repeat, #1f2a1c;
+  border: none;
+  border-radius: 10px;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.55);
+  overflow: hidden;
+}
+
+/* Тёмное окно под аватар (левая часть панели) */
+.bosses-page .boss-card__portrait {
+  position: absolute;
+  left: 13.7%;
+  top: 26.5%;
+  width: 13.4%;
+  height: 41.5%;
+  overflow: hidden;
+  background: #0b0d0a;
+  border-radius: 3px;
+}
+
+.bosses-page .boss-card__avatar {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Пергамент с наградой (центр панели) */
+.bosses-page .boss-card__rewards {
+  position: absolute;
+  left: 36.9%;
+  top: 19%;
+  width: 26.6%;
+  height: 61%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  color: #4a2412;
+  font-size: 15px;
+  font-weight: bold;
+  text-align: center;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.35);
+}
+
+.bosses-page .boss-card__reward-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  line-height: 1.1;
+}
+
+.bosses-page .boss-card__reward-icon {
+  font-size: 17px;
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.35));
+}
+
+/* Металлическая часть справа */
+.bosses-page .boss-card__side {
+  position: absolute;
+  left: 65%;
+  top: 15%;
+  width: 30.5%;
+  height: 70%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  color: #e8ddc0;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.9);
+}
+
+.bosses-page .boss-card__name {
+  width: 100%;
+  color: #ffe39a;
+  font-size: 18px;
+  font-weight: bold;
+  letter-spacing: 0.5px;
+  text-align: center;
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.bosses-page .boss-card__combos {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+}
+
+.bosses-page .boss-card__combos .combo-frame {
+  width: 28px;
+  height: 28px;
+  background: rgba(0, 0, 0, 0.25);
+}
+
+.bosses-page .boss-card__stats {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 4px 10px;
+  font-size: 12px;
+  color: #d5c8a4;
+}
+
+.bosses-page .boss-card__stat {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  white-space: nowrap;
+}
+
+.bosses-page .boss-card__attack {
+  align-self: center;
+  padding: 6px 24px;
+  color: #2a1408;
+  font-size: 14px;
+  font-weight: bold;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.45);
+  cursor: pointer;
+  background: linear-gradient(#ffe36a, #d9a400);
+  border: 2px solid #7a4300;
+  border-radius: 6px;
+  box-shadow: 0 3px 0 #5a2a00, 0 5px 10px rgba(0, 0, 0, 0.45);
+  transition: filter 0.12s ease, transform 0.12s ease;
+}
+
+.bosses-page .boss-card__attack:hover {
+  filter: brightness(1.08);
+}
+
+.bosses-page .boss-card__attack:active {
+  transform: translateY(1px);
+  box-shadow: 0 2px 0 #5a2a00;
+}
+
+/* --- Загрузка / пустой список --- */
+.bosses-loading {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #151b12;
+  color: #d8c49a;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.bosses-page .bosses-empty {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 24px;
+  color: #d8c49a;
+  font-size: 15px;
+  font-weight: bold;
+  text-align: center;
+}
+
+.bosses-refresh-btn {
+  padding: 8px 22px;
+  color: #2a1408;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  background: linear-gradient(#ffe36a, #d9a400);
+  border: 2px solid #7a4300;
+  border-radius: 6px;
+}
+
+.bosses-refresh-btn:hover {
+  filter: brightness(1.08);
+}
+
+/* =========================================
+   Адаптив
+   ========================================= */
+.frame--compact .bosses-page .bosses-list {
+  padding: 8px;
+  gap: 8px;
+}
+
+.frame--compact .bosses-page .boss-card__name {
+  font-size: 15px;
+}
+
+.frame--compact .bosses-page .boss-card__rewards {
+  gap: 4px;
+  font-size: 13px;
+}
+
+.frame--compact .bosses-page .boss-card__reward-icon {
+  font-size: 14px;
+}
+
+.frame--compact .bosses-page .boss-card__combos .combo-frame {
+  width: 22px;
+  height: 22px;
+}
+
+.frame--compact .bosses-page .boss-card__stats {
+  gap: 3px 6px;
+  font-size: 10px;
+}
+
+.frame--compact .bosses-page .boss-card__attack {
+  padding: 4px 16px;
+  font-size: 12px;
+}
+
+.frame--phone .bosses-page .bosses-tab {
+  padding: 6px 4px;
+  font-size: 12px;
+}
+
+.frame--phone .bosses-page .boss-card {
+  border-radius: 6px;
+}
+
+.frame--phone .bosses-page .boss-card__rewards {
+  gap: 3px;
+  font-size: 9px;
+  text-shadow: none;
+}
+
+.frame--phone .bosses-page .boss-card__reward-icon {
+  font-size: 10px;
+}
+
+.frame--phone .bosses-page .boss-card__name {
+  font-size: 11px;
+}
+
+/* На телефоне правая зона слишком мала для комбо и статы — оставляем имя и кнопку */
+.frame--phone .bosses-page .boss-card__combos,
+.frame--phone .bosses-page .boss-card__stats {
+  display: none;
+}
+
+.frame--phone .bosses-page .boss-card__side {
+  justify-content: center;
+  gap: 4px;
+}
+
+.frame--phone .bosses-page .boss-card__attack {
+  padding: 3px 8px;
+  font-size: 9px;
+  border-width: 1px;
+  border-radius: 4px;
+  box-shadow: none;
+}
+

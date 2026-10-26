@@ -17,12 +17,23 @@ export default function BossFightScene({ fight, onClose }: Props) {
     fight.inventory || { knife: 0, poison: 0, pistol: 0 }
   );
   const [isAttacking, setIsAttacking] = useState(false);
+  const [leaveConfirmOpen, setLeaveConfirmOpen] = useState(false);
+  const [isLeaving, setIsLeaving] = useState(false);
+  const [leaveError, setLeaveError] = useState<string | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const onCloseRef = useRef(onClose);
+  const closedRef = useRef(false);
+  const leavingRef = useRef(false);
 
   useEffect(() => {
     onCloseRef.current = onClose;
   }, [onClose]);
+
+  const finishFight = (result: 'win' | 'lose', reward?: BossFightReward) => {
+    if (closedRef.current) return;
+    closedRef.current = true;
+    onClose(result, reward);
+  };
 
   // === ТАЙМЕР ===
   useEffect(() => {
@@ -36,8 +47,23 @@ export default function BossFightScene({ fight, onClose }: Props) {
   }, []);
 
   useEffect(() => {
-    if (timeLeft === 0) onCloseRef.current('lose');
+    // Пока летит запрос на выход — не закрываем сцену сами
+    if (timeLeft > 0 || closedRef.current || leavingRef.current) return;
+    closedRef.current = true;
+    onCloseRef.current('lose');
   }, [timeLeft]);
+
+  // Escape закрывает подтверждение сдачи
+  useEffect(() => {
+    if (!leaveConfirmOpen) return;
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && !leavingRef.current) setLeaveConfirmOpen(false);
+    };
+
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [leaveConfirmOpen]);
 
   const hpPercent = (currentHp / fight.maxHp) * 100;
 
@@ -71,7 +97,7 @@ export default function BossFightScene({ fight, onClose }: Props) {
       const data = await res.json();
 
       if (data.success) {
-        onClose('win', data.reward);
+        finishFight('win', data.reward);
       } else {
         setCurrentHp(data.currentHp);
         setInventory((prev) => ({
@@ -83,6 +109,52 @@ export default function BossFightScene({ fight, onClose }: Props) {
       console.error('Ошибка удара:', err);
     } finally {
       setIsAttacking(false);
+    }
+  };
+
+  // === СДАТЬСЯ ===
+  const openLeaveConfirm = () => {
+    if (isLeaving || leavingRef.current || isAttacking || closedRef.current) return;
+    setLeaveError(null);
+    setLeaveConfirmOpen(true);
+  };
+
+  const closeLeaveConfirm = () => {
+    if (leavingRef.current) return;
+    setLeaveError(null);
+    setLeaveConfirmOpen(false);
+  };
+
+  const handleLeave = async () => {
+    if (leavingRef.current || closedRef.current) return;
+
+    setIsLeaving(true);
+    leavingRef.current = true;
+    setLeaveError(null);
+
+    try {
+      const res = await fetch('/api/bosses/leave', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+      });
+
+      const data: { error?: string; message?: string; success?: boolean } = await res
+        .json()
+        .catch(() => ({}));
+
+      if (!res.ok) {
+        throw new Error(data.error || 'Не удалось сдаться');
+      }
+
+      // Только после успешного ответа сервера показываем поражение
+      setLeaveConfirmOpen(false);
+      finishFight('lose');
+    } catch (err) {
+      setLeaveError(err instanceof Error ? err.message : 'Не удалось сдаться');
+    } finally {
+      setIsLeaving(false);
+      leavingRef.current = false;
     }
   };
 
@@ -150,9 +222,23 @@ export default function BossFightScene({ fight, onClose }: Props) {
           {/* Кнопка сдаться */}
           <div 
             className="slot" 
-            onClick={() => onClose('lose')} 
-            title="Сдаться"
-            style={{ marginLeft: 'auto', background: '#500', borderColor: '#a00' }}
+            onClick={openLeaveConfirm} 
+            title="Сдаться (нужно подтверждение)"
+            role="button"
+            tabIndex={0}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                openLeaveConfirm();
+              }
+            }}
+            style={{
+              marginLeft: 'auto',
+              background: '#500',
+              borderColor: '#a00',
+              opacity: isLeaving ? 0.6 : 1,
+              cursor: isLeaving ? 'wait' : 'pointer',
+            }}
           >
             🏳️
           </div>
@@ -169,6 +255,47 @@ export default function BossFightScene({ fight, onClose }: Props) {
           </div>
         </div>
       </div>
+
+      {leaveConfirmOpen && (
+        <div className="fight-confirm-overlay" onClick={closeLeaveConfirm}>
+          <div
+            className="fight-confirm"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="fight-leave-title"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="fight-confirm__icon">🏳️</div>
+            <h3 className="fight-confirm__title" id="fight-leave-title">
+              Сдаться?
+            </h3>
+            <p className="fight-confirm__text">
+              Бой будет засчитан как поражение. Точно сдаёмся?
+            </p>
+
+            {leaveError && <div className="fight-confirm__error">{leaveError}</div>}
+
+            <div className="fight-confirm__actions">
+              <button
+                type="button"
+                className="fight-confirm__btn fight-confirm__btn--danger"
+                onClick={handleLeave}
+                disabled={isLeaving}
+              >
+                {isLeaving ? 'Сдаёмся...' : 'Да, сдаться'}
+              </button>
+              <button
+                type="button"
+                className="fight-confirm__btn"
+                onClick={closeLeaveConfirm}
+                disabled={isLeaving}
+              >
+                Остаться
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

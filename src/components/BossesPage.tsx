@@ -1,10 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import BossLobby from './BossLobby'; 
 import type { BossDetails } from './BossLobby';
 import BossFightScene from './BossFightScene';
 import BossResultScene from './BossResultScene'; // <--- ДОБАВИТЬ ИМПОРТ
 import { usePlayer } from '../store/playerStore';
 import type { ActiveBossFight, BossFightReward, ServerBoss } from './bossTypes';
+import '../styles/bosses.css';
 
 export interface BossReward {
   cigarettes: number;
@@ -41,39 +42,97 @@ const TABS = [
   { id: 'secret', title: 'Засекречено' },
 ] as const;
 
+const COMBO_TITLES = {
+  common: 'Обычное комбо',
+  rare: 'Редкое комбо',
+  epic: 'Эпическое комбо',
+} as const;
+
+// Сервер не отдаёт отдельный эндпоинт «результат просмотрен/получен»,
+// поэтому запоминаем показ результата в рамках вкладки. Это убирает
+// повторный показ одного и того же результата при перезаходе на страницу.
+const RESULT_SEEN_KEY = 'bossResultSeen';
+
+const hasSeenBossResult = () => {
+  try {
+    return sessionStorage.getItem(RESULT_SEEN_KEY) === '1';
+  } catch {
+    return false;
+  }
+};
+
+const markBossResultSeen = () => {
+  try {
+    sessionStorage.setItem(RESULT_SEEN_KEY, '1');
+  } catch {
+    // sessionStorage может быть недоступен (приватный режим) — не критично
+  }
+};
+
+const clearBossResultSeen = () => {
+  try {
+    sessionStorage.removeItem(RESULT_SEEN_KEY);
+  } catch {
+    // ignore
+  }
+};
+
 function BossCard({ boss, onAttack }: { boss: Boss; onAttack: (id: string) => void }) {
   const r = boss.reward;
+
   return (
-    <div className="boss-card">
-      <div className="boss-left">
-        <img className="boss-avatar" src={boss.image} alt="" />
-        <div className="boss-name">{boss.name}</div>
-        <button className="boss-attack-btn" onClick={() => onAttack(boss.id)}>Атаковать</button>
+    <article className="boss-card">
+      {/* Тёмное окно слева на панели */}
+      <div className="boss-card__portrait">
+        <img className="boss-card__avatar" src={boss.image} alt={boss.name} loading="lazy" />
       </div>
 
-      <div className="boss-reward">
-        <div className="boss-reward-title">· Награда ·</div>
-        <div className="boss-reward-row">
-          🚬 {r.cigarettes} &nbsp;&nbsp; 🤘 {r.reputation.toLocaleString('ru-RU')}
+      {/* Пергамент «НАГРАДА» в центре панели */}
+      <div className="boss-card__rewards">
+        <div className="boss-card__reward-row">
+          <span className="boss-card__reward-icon">🚬</span>
+          <span>{r.cigarettes.toLocaleString('ru-RU')}</span>
         </div>
-        <div className="boss-reward-row">🗝️ Ключи: {r.keys}</div>
+        <div className="boss-card__reward-row">
+          <span className="boss-card__reward-icon">🤘</span>
+          <span>{r.reputation.toLocaleString('ru-RU')}</span>
+        </div>
+        <div className="boss-card__reward-row">
+          <span className="boss-card__reward-icon">🗝️</span>
+          <span>{r.keys.toLocaleString('ru-RU')}</span>
+        </div>
       </div>
 
-      <div className="boss-combos">
-        {(['common', 'rare', 'epic'] as const).map((tier) => (
-          <div key={tier} className={`combo-frame combo-frame--${tier}`}>
-            <div className="combo-empty" />
-          </div>
-        ))}
-      </div>
+      {/* Металлическая часть справа: имя, комбо, статистика, кнопка */}
+      <div className="boss-card__side">
+        <div className="boss-card__name" title={boss.name}>{boss.name}</div>
 
-      <div className="boss-stats">
-        <div className="boss-stats-row"><span>Победы:</span> <b>0</b></div>
-        <div className="boss-stats-row"><span className="skull skull--common">💀</span> 0</div>
-        <div className="boss-stats-row"><span className="skull skull--rare">💀</span> 0</div>
-        <div className="boss-stats-row"><span className="skull skull--epic">💀</span> 0</div>
+        <div className="boss-card__combos">
+          {(['common', 'rare', 'epic'] as const).map((tier) => (
+            <div key={tier} className={`combo-frame combo-frame--${tier}`} title={COMBO_TITLES[tier]}>
+              <div className="combo-empty" />
+            </div>
+          ))}
+        </div>
+
+        <div className="boss-card__stats">
+          <span className="boss-card__stat"><b>{boss.wins}</b> побед</span>
+          <span className="boss-card__stat" title="Обычные комбо">
+            <span className="skull skull--common">💀</span>{boss.comboStats.common}
+          </span>
+          <span className="boss-card__stat" title="Редкие комбо">
+            <span className="skull skull--rare">💀</span>{boss.comboStats.rare}
+          </span>
+          <span className="boss-card__stat" title="Эпические комбо">
+            <span className="skull skull--epic">💀</span>{boss.comboStats.epic}
+          </span>
+        </div>
+
+        <button className="boss-card__attack" type="button" onClick={() => onAttack(boss.id)}>
+          Атаковать
+        </button>
       </div>
-    </div>
+    </article>
   );
 }
 
@@ -94,54 +153,89 @@ export default function BossesPage() {
     bossName: string;
   } | null>(null);
 
-  useEffect(() => {
-  async function initPage() {
+  // Витрину грузим отдельной функцией: её нужно обновлять и после результата боя,
+  // и при возврате на страницу, иначе остаётся пустой экран.
+  const loadShowcase = useCallback(async () => {
     try {
-      const activeRes = await fetch('/api/bosses/active');
-      const activeData = await activeRes.json();
-      
-      // 1. Если есть активный бой — открываем его
-      if (activeData.active) {
-        setActiveFight({
-          fight: {
-            bossId: activeData.bossId,
-            name: activeData.name,
-            img_boss: activeData.img_boss,
-            currentHp: activeData.currentHp,
-            maxHp: activeData.maxHp,
-            endTime: activeData.endTime,
-            serverTime: activeData.serverTime,
-            inventory: activeData.inventory
-          },
-          mode: activeData.mode || 'pazan'
-        });
-        setLoading(false);
-        return;
-      }
-
-      // 2. ЕСЛИ БОЯ НЕТ, НО ЕСТЬ РЕЗУЛЬТАТ (прошлый бой закончился)
-      if (activeData.result) {
-        setFightResult({
-          result: activeData.result, // 'win' или 'lose'
-          bossName: activeData.bossName || 'Босс', // Если сервер присылает имя
-          reward: activeData.reward || undefined // Если сервер присылает награду (для win)
-        });
-        setLoading(false);
-        return;
-      }
-
-      // 3. Если ничего нет — грузим витрину
       const res = await fetch('/api/bosses');
+      if (!res.ok) throw new Error('Не удалось загрузить список боссов');
       const data = await res.json();
-      setServerBosses(data.bosses || []);
+      setServerBosses(Array.isArray(data.bosses) ? data.bosses : []);
     } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
+      console.error('Ошибка загрузки витрины боссов:', err);
     }
-  }
-  initPage();
-}, []);;
+  }, []);
+
+  useEffect(() => {
+    let alive = true;
+
+    async function initPage() {
+      try {
+        const activeRes = await fetch('/api/bosses/active');
+        const activeData = await activeRes.json();
+
+        if (!alive) return;
+
+        // 1. Если есть активный бой — открываем его
+        if (activeData.active) {
+          // Начался новый бой — следующий результат нужно показать заново
+          clearBossResultSeen();
+          setActiveFight({
+            fight: {
+              bossId: activeData.bossId,
+              name: activeData.name,
+              img_boss: activeData.img_boss,
+              currentHp: activeData.currentHp,
+              maxHp: activeData.maxHp,
+              endTime: activeData.endTime,
+              serverTime: activeData.serverTime,
+              inventory: activeData.inventory,
+            },
+            mode: activeData.mode || 'pazan',
+          });
+          setLoading(false);
+          // Список грузим в фоне, чтобы он был готов к возврату с боя
+          void loadShowcase();
+          return;
+        }
+
+        // 2. Если боя нет, но есть результат — показываем его только один раз
+        if (activeData.result) {
+          if (!hasSeenBossResult()) {
+            markBossResultSeen();
+            setFightResult({
+              result: activeData.result, // 'win' или 'lose'
+              bossName: activeData.bossName || 'Босс',
+              reward: activeData.reward || undefined,
+            });
+          }
+        } else {
+          // Сервер уже забыл результат — снимаем локальную отметку
+          clearBossResultSeen();
+        }
+
+        // 3. Витрину грузим ВСЕГДА, даже если сверху показан результат.
+        // Это и лечит пустую страницу после «Забрать награду».
+        await loadShowcase();
+      } catch (err) {
+        console.error(err);
+        if (alive) await loadShowcase();
+      } finally {
+        if (alive) setLoading(false);
+      }
+    }
+
+    void initPage();
+    return () => {
+      alive = false;
+    };
+  }, [loadShowcase]);
+
+  const handleRefresh = async () => {
+    setLoading(true);
+    await loadShowcase();
+    setLoading(false);
+  };
 
   const handleAttackClick = async (bossId: string) => {
     setLoadingLobby(true);
@@ -187,6 +281,10 @@ export default function BossesPage() {
         reward={fightResult.reward}
         onClose={() => {
           setFightResult(null);
+          // Возвращаемся на витрину: обязательно перезапрашиваем список,
+          // иначе после «Забрать награду» страница будет пустой.
+          if (serverBosses.length === 0) setLoading(true);
+          void loadShowcase().finally(() => setLoading(false));
           // После боя обновляем баланс/авторитет в верхней панели
           void fetchPlayerData();
         }}
@@ -201,6 +299,8 @@ export default function BossesPage() {
         fight={activeFight.fight} 
         mode={activeFight.mode} 
         onClose={(result, reward) => {
+          // Результат уже показан локально — не даём серверу показать его ещё раз
+          markBossResultSeen();
           setActiveFight(null);
           setFightResult({
             result,
@@ -219,6 +319,8 @@ export default function BossesPage() {
         boss={lobbyBoss} 
         onClose={() => setLobbyBoss(null)} 
         onFightSuccess={(fightData, mode) => {
+          // Стартовал новый бой — разрешаем показать его результат
+          clearBossResultSeen();
           setLobbyBoss(null);
           setActiveFight({ 
             fight: { 
@@ -234,7 +336,7 @@ export default function BossesPage() {
   }
 
   // 3. Витрина
-  if (loading) return <div>Загрузка витрины...</div>;
+  if (loading) return <div className="bosses-loading">Загрузка витрины...</div>;
 
   return (
     <div className="bosses-page">
@@ -252,9 +354,18 @@ export default function BossesPage() {
         ))}
       </div>
       <div className="bosses-list">
-        {formattedBosses.map((b) => (
-          <BossCard key={b.id} boss={b} onAttack={handleAttackClick} />
-        ))}
+        {formattedBosses.length === 0 ? (
+          <div className="bosses-empty">
+            <div>Список боссов пуст</div>
+            <button className="bosses-refresh-btn" type="button" onClick={handleRefresh}>
+              Обновить
+            </button>
+          </div>
+        ) : (
+          formattedBosses.map((b) => (
+            <BossCard key={b.id} boss={b} onAttack={handleAttackClick} />
+          ))
+        )}
       </div>
     </div>
   );

@@ -258,3 +258,99 @@
 .frame--phone .slot { width: 44px; height: 44px; }
 .frame--phone .slot-icon { width: 46px; height: 46px; }
 .frame--phone .slot-count { font-size: 11px; }
+
+/* === Подтверждение сдачи === */
+.fight-confirm-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(0, 0, 0, 0.74);
+  backdrop-filter: blur(2px);
+}
+
+.fight-confirm {
+  width: min(360px, 92%);
+  padding: 18px 18px 16px;
+  color: #f3e4c2;
+  text-align: center;
+  background: linear-gradient(#3b2a1b, #21150c);
+  border: 3px solid #8a1c12;
+  border-radius: 12px;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.7);
+}
+
+.fight-confirm__icon {
+  font-size: 30px;
+  line-height: 1;
+}
+
+.fight-confirm__title {
+  margin: 6px 0 4px;
+  font-size: 22px;
+  letter-spacing: 0.5px;
+  color: #ffd966;
+}
+
+.fight-confirm__text {
+  margin: 0;
+  font-size: 13px;
+  color: #d8c9a4;
+}
+
+.fight-confirm__error {
+  margin-top: 10px;
+  padding: 6px 8px;
+  font-size: 12px;
+  font-weight: bold;
+  color: #ffb4a8;
+  background: rgba(140, 20, 20, 0.35);
+  border: 1px solid #a33333;
+  border-radius: 6px;
+}
+
+.fight-confirm__actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.fight-confirm__btn {
+  flex: 1;
+  padding: 9px 10px;
+  font-size: 14px;
+  font-weight: bold;
+  color: #f3e4c2;
+  cursor: pointer;
+  background: linear-gradient(#5a4a36, #33281a);
+  border: 2px solid #7a5a2a;
+  border-radius: 7px;
+}
+
+.fight-confirm__btn--danger {
+  color: #fff;
+  text-shadow: 1px 1px 0 #000;
+  background: linear-gradient(#c62828, #7b1010);
+  border-color: #4a0808;
+}
+
+.fight-confirm__btn:hover:not(:disabled) {
+  filter: brightness(1.1);
+}
+
+.fight-confirm__btn:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.frame--phone .fight-confirm {
+  width: min(320px, 94%);
+  padding: 14px;
+}
+
+.frame--phone .fight-confirm__title {
+  font-size: 18px;
+}
