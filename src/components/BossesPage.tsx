@@ -3,6 +3,8 @@ import BossLobby from './BossLobby';
 import type { BossDetails } from './BossLobby';
 import BossFightScene from './BossFightScene';
 import BossResultScene from './BossResultScene'; // <--- ДОБАВИТЬ ИМПОРТ
+import { usePlayer } from '../store/playerStore';
+import type { ActiveBossFight, BossFightReward, ServerBoss } from './bossTypes';
 
 export interface BossReward {
   cigarettes: number;
@@ -76,16 +78,21 @@ function BossCard({ boss, onAttack }: { boss: Boss; onAttack: (id: string) => vo
 }
 
 export default function BossesPage() {
+  const fetchPlayerData = usePlayer((s) => s.fetchPlayerData);
   const [tab, setTab] = useState<(typeof TABS)[number]['id']>('common');
-  const [serverBosses, setServerBosses] = useState<any[]>([]);
+  const [serverBosses, setServerBosses] = useState<ServerBoss[]>([]);
   const [loading, setLoading] = useState(true);
 
   const [lobbyBoss, setLobbyBoss] = useState<BossDetails | null>(null);
-  const [activeFight, setActiveFight] = useState<{ fight: any, mode: string } | null>(null);
+  const [activeFight, setActiveFight] = useState<{ fight: ActiveBossFight; mode: string } | null>(null);
   const [loadingLobby, setLoadingLobby] = useState(false);
   
   // ДОБАВЛЯЕМ СОСТОЯНИЕ ДЛЯ РЕЗУЛЬТАТА БОЯ
-  const [fightResult, setFightResult] = useState<{ result: 'win' | 'lose', reward?: any, bossName: string } | null>(null);
+  const [fightResult, setFightResult] = useState<{
+    result: 'win' | 'lose';
+    reward?: BossFightReward;
+    bossName: string;
+  } | null>(null);
 
   useEffect(() => {
   async function initPage() {
@@ -117,7 +124,7 @@ export default function BossesPage() {
         setFightResult({
           result: activeData.result, // 'win' или 'lose'
           bossName: activeData.bossName || 'Босс', // Если сервер присылает имя
-          reward: activeData.reward || null // Если сервер присылает награду (для win)
+          reward: activeData.reward || undefined // Если сервер присылает награду (для win)
         });
         setLoading(false);
         return;
@@ -143,7 +150,7 @@ export default function BossesPage() {
       if (!res.ok) throw new Error('Ошибка загрузки деталей');
       const data: BossDetails = await res.json();
       setLobbyBoss(data);
-    } catch (err) {
+    } catch {
       alert('Не удалось получить данные босса');
     } finally {
       setLoadingLobby(false);
@@ -152,8 +159,9 @@ export default function BossesPage() {
 
   const formattedBosses: Boss[] = serverBosses.map((b) => {
     let totalKeys = 0;
-    if (b.reward?.keys_drop) {
-      totalKeys = Object.values(b.reward.keys_drop).reduce((sum: number, val: any) => sum + Number(val), 0);
+    const keysDrop = b.reward?.keys_drop;
+    if (keysDrop) {
+      totalKeys = Object.values(keysDrop).reduce<number>((sum, val) => sum + Number(val), 0);
     }
     return {
       id: String(b.id),
@@ -177,7 +185,11 @@ export default function BossesPage() {
         result={fightResult.result}
         bossName={fightResult.bossName}
         reward={fightResult.reward}
-        onClose={() => setFightResult(null)}
+        onClose={() => {
+          setFightResult(null);
+          // После боя обновляем баланс/авторитет в верхней панели
+          void fetchPlayerData();
+        }}
       />
     );
   }
@@ -212,8 +224,7 @@ export default function BossesPage() {
             fight: { 
               ...fightData, 
               name: lobbyBoss.name,
-              img_boss: lobbyBoss.img_boss,
-              inventory: fightData.inventory // <--- ДОБАВИТЬ ИНВЕНТАРЬ (если сервер его вернул)
+              img_boss: lobbyBoss.img_boss
             }, 
             mode 
           });

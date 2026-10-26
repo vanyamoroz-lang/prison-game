@@ -1,20 +1,44 @@
-* { box-sizing: border-box; }
-body { margin: 0; background: #2b1d14; font-family: Arial, sans-serif; }
-
 .page {
-  min-height: 100vh;
-  display: flex; justify-content: center; align-items: flex-start;
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  padding: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   overflow: hidden;
 }
 
-.frame {
+/* Обёртка, которая резервирует место под масштабированную игру.
+   Без неё transform: scale() не меняет layout-размер и макет «разъезжается». */
+.frame-fit {
+  flex: 1;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.frame-scaler {
   position: relative;
-  transform-origin: top center;
+  flex: 0 0 auto;
+}
+
+.frame {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform-origin: top left;
   background: #1a1208;
   border: 3px solid #000;
   border-radius: 6px;
   display: grid;
   grid-template-rows: 34px 1fr 48px 70px;
+  font-family: Arial, sans-serif;
 }
 
 /* верхняя панель */
@@ -197,3 +221,75 @@ body { margin: 0; background: #2b1d14; font-family: Arial, sans-serif; }
 .skull--common { filter: grayscale(1); }
 .skull--rare { filter: hue-rotate(30deg) saturate(2); }
 .skull--epic { filter: hue-rotate(-20deg) saturate(2); }
+
+/* =========================================
+   АДАПТИВНЫЕ РАСКЛАДКИ
+   .frame--compact — планшет (уже 820px)
+   .frame--phone   — телефон (уже 520px)
+   ========================================= */
+
+/* --- Компактный макет: прячем полосу друзей, правую панель переносим вниз --- */
+.frame--compact {
+  grid-template-rows: 34px 1fr 48px;
+}
+.frame--compact .friends { display: none; }
+.frame--compact .scene { flex-direction: column; }
+
+.frame--compact .location-panel {
+  width: 100%;
+  height: 52px;
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 8px;
+  border-left: none;
+  border-top: 3px solid #5a3200;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+.frame--compact .loc-list { flex-direction: row; }
+.frame--compact .loc-btn { padding: 5px 9px; font-size: 13px; white-space: nowrap; }
+.frame--compact .loc-icon { font-size: 18px; }
+.frame--compact .loc-reserved { display: none; }
+
+.frame--compact .topbar { gap: 3px; }
+.frame--compact .chip { font-size: 11px; padding: 0 6px; gap: 4px; }
+.frame--compact .chip.wide { flex: 1.5; }
+
+.frame--compact .zone-card { grid-template-columns: 120px 1fr 1fr; }
+
+/* --- Телефон: верхняя панель в 3 колонки, карточки в одну колонку --- */
+.frame--phone {
+  grid-template-rows: 62px 1fr 46px;
+}
+.frame--phone .topbar {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 3px;
+  padding: 3px;
+}
+.frame--phone .chip,
+.frame--phone .chip.wide {
+  flex: none;
+  min-width: 0;
+  font-size: 11px;
+  padding: 0 4px;
+  gap: 3px;
+}
+.frame--phone .location-panel { height: 50px; gap: 4px; padding: 4px 6px; }
+.frame--phone .loc-btn { padding: 4px 7px; font-size: 12px; gap: 4px; }
+.frame--phone .loc-icon { font-size: 16px; }
+
+.frame--phone .tabs { gap: 6px; padding: 5px 6px; justify-content: space-between; }
+.frame--phone .tab { width: 38px; height: 34px; font-size: 18px; }
+
+.frame--phone .zone-card { grid-template-columns: 1fr; }
+.frame--phone .zone-image { width: 100%; max-width: 180px; height: auto; aspect-ratio: 10 / 7; }
+
+.frame--phone .boss-card { grid-template-columns: 90px 1fr; }
+.frame--phone .boss-combos { justify-content: flex-start; }
+.frame--phone .boss-stats { grid-column: 1 / -1; }
+
+@media (max-width: 520px) {
+  .page { padding: 6px; }
+}

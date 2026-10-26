@@ -1,4 +1,5 @@
 ﻿import { useState } from 'react';
+import type { BossFightState } from './bossTypes';
 import '../styles/BossLobby.css'; 
 
 export interface BossDetails {
@@ -25,7 +26,7 @@ export interface BossDetails {
 interface Props {
   boss: BossDetails;
   onClose: () => void;
-  onFightSuccess: (fightData: any, mode: string) => void; 
+  onFightSuccess: (fightData: BossFightState, mode: string) => void; 
 }
 
 const MODE_NAMES: Record<string, string> = {
@@ -68,8 +69,8 @@ export default function BossLobby({ boss, onClose, onFightSuccess }: Props) {
 
       onFightSuccess(data.fight, selectedMode);
       
-    } catch (err: any) {
-      setErrorMsg(err.message);
+    } catch (err) {
+      setErrorMsg(err instanceof Error ? err.message : 'Ошибка при нападении');
     } finally {
       setIsLoading(false);
     }

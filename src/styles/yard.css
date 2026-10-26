@@ -177,3 +177,226 @@
   0%, 100% { transform: translate(-50%, -50%) scale(1); }
   50%      { transform: translate(-50%, -50%) scale(1.06); }
 }
+
+/* ===== Кнопка оружейки во дворе ===== */
+.yard-shop-btn {
+  position: absolute;
+  left: 14px;
+  bottom: 14px;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px 8px 10px;
+  cursor: pointer;
+  color: #fff;
+  font-weight: bold;
+  font-size: 14px;
+  text-shadow: 1px 1px 0 #000;
+  background: linear-gradient(#8a2a1a, #4a0f08);
+  border: 2px solid #c89a3a;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+  transition: transform 0.12s ease, filter 0.12s ease;
+}
+.yard-shop-btn img {
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
+}
+.yard-shop-btn:hover {
+  filter: brightness(1.15);
+  transform: translateY(-1px);
+}
+.yard-shop-btn:active {
+  transform: scale(0.97);
+}
+
+/* ===== Магазин оружия ===== */
+.weapon-shop {
+  position: relative;
+  width: min(360px, 88%);
+  padding: 18px 18px 16px;
+  color: #3a2410;
+  text-align: center;
+  background: linear-gradient(#f3e4b8, #d9b871);
+  border: 3px solid #5a3200;
+  border-radius: 12px;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.6);
+  max-height: 100%;
+  overflow-y: auto;
+}
+
+.weapon-shop-close {
+  position: absolute;
+  top: -12px;
+  right: -12px;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: #c00;
+  color: #fff;
+  border: 2px solid #fff;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.weapon-shop-title {
+  margin: 0;
+  font-size: 20px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: #4a1f0a;
+}
+
+.weapon-shop-subtitle {
+  margin: 4px 0 12px;
+  font-size: 12px;
+  color: #6a4a24;
+}
+
+.weapon-shop-list {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.weapon-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 4px;
+  cursor: pointer;
+  color: #3a2410;
+  font-weight: bold;
+  background: rgba(255, 255, 255, 0.45);
+  border: 2px solid #a07a3a;
+  border-radius: 8px;
+}
+.weapon-option:hover {
+  background: rgba(255, 255, 255, 0.72);
+}
+.weapon-option.active {
+  background: #fff6d8;
+  border-color: #c00;
+  box-shadow: 0 0 0 2px rgba(200, 0, 0, 0.25);
+}
+
+.weapon-option-icon {
+  width: 42px;
+  height: 42px;
+  object-fit: contain;
+}
+.weapon-option-name {
+  font-size: 12px;
+}
+
+.weapon-shop-amount {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 14px;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.weapon-amount-control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.weapon-amount-btn {
+  width: 32px;
+  height: 32px;
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+  background: linear-gradient(#fff2b0, #e0a020);
+  border: 2px solid #7a4300;
+  border-radius: 6px;
+}
+.weapon-amount-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.weapon-amount-value {
+  min-width: 34px;
+  font-size: 18px;
+}
+
+.weapon-presets {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+  margin-top: 8px;
+}
+.weapon-preset {
+  padding: 3px 10px;
+  font-size: 12px;
+  font-weight: bold;
+  cursor: pointer;
+  background: #f7e8bf;
+  border: 1px solid #7a4300;
+  border-radius: 14px;
+}
+.weapon-preset.active {
+  color: #fff;
+  background: #c00;
+  border-color: #7a0000;
+}
+
+.weapon-shop-message {
+  margin-top: 10px;
+  padding: 6px 8px;
+  font-size: 12px;
+  font-weight: bold;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.08);
+}
+.weapon-shop-message.success {
+  color: #1c6b1c;
+  background: #d8f0c8;
+  border: 1px solid #6aa84f;
+}
+.weapon-shop-message.error {
+  color: #8b0000;
+  background: #ffd8d8;
+  border: 1px solid #c00;
+}
+
+.weapon-shop-buy {
+  width: 100%;
+  margin-top: 12px;
+  padding: 10px;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  color: #fff;
+  text-shadow: 1px 1px 0 #000;
+  background: linear-gradient(#5aa02a, #2f6b12);
+  border: 2px solid #234d0c;
+  border-radius: 8px;
+}
+.weapon-shop-buy:hover:not(:disabled) {
+  filter: brightness(1.1);
+}
+.weapon-shop-buy:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.frame--compact .yard-shop-btn {
+  left: 10px;
+  bottom: 10px;
+  padding: 6px 10px;
+  font-size: 12px;
+}
+.frame--compact .yard-shop-btn img {
+  width: 24px;
+  height: 24px;
+}
+.frame--compact .weapon-shop {
+  width: min(340px, 92%);
+  padding: 14px;
+}

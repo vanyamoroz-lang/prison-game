@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { api } from '../../api';
+import { usePlayer } from '../../store/playerStore';
 import '../../styles/poker.css';
 
 const TABLE_BG = '/assets/gambling/pokerTable.png';
@@ -30,6 +31,8 @@ interface Props {
 }
 
 export default function PokerPage({ onExit }: Props) {
+  const fetchPlayerData = usePlayer((s) => s.fetchPlayerData);
+  const applyPlayerData = usePlayer((s) => s.applyPlayerData);
   const [state, setState] = useState<PokerState | null>(null);
   const [message, setMessage] = useState('');
   const [lastResult, setLastResult] = useState<PlayResult | null>(null);
@@ -40,7 +43,9 @@ export default function PokerPage({ onExit }: Props) {
   useEffect(() => {
     api('/api/poker')
       .then((data: PokerState) => setState(data))
-      .catch((err) => setMessage(err.message))
+      .catch((err: unknown) =>
+        setMessage(err instanceof Error ? err.message : 'Не удалось загрузить стол')
+      )
       .finally(() => setLoading(false));
   }, []);
 
@@ -57,8 +62,12 @@ export default function PokerPage({ onExit }: Props) {
       setState({ level: data.level, progress: data.progress, balance: data.balance });
       setMessage(data.message);
       setLastResult(data);
-    } catch (err: any) {
-      setMessage(err.message);
+
+      // Награда могла быть деньгами/сигаретами — обновляем верхнюю панель.
+      applyPlayerData(data);
+      void fetchPlayerData();
+    } catch (err) {
+      setMessage(err instanceof Error ? err.message : 'Ошибка игры');
     } finally {
       setPlaying(false);
     }

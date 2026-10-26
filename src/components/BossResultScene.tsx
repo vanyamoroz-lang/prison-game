@@ -1,13 +1,10 @@
-﻿import '../styles/BossResultScene.css';
+﻿import type { BossFightReward } from './bossTypes';
+import '../styles/BossResultScene.css';
 
 interface Props {
   result: 'win' | 'lose';
   bossName: string;
-  reward?: {
-    cigarettes: number;
-    reputation: number;
-    keys_drop: Record<string, number>;
-  };
+  reward?: BossFightReward;
   onClose: () => void;
 }
 

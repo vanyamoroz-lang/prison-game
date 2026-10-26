@@ -234,3 +234,27 @@
   text-shadow: 1px 1px 0 #000;
   z-index: 10;
 }
+
+/* --- Адаптив сцены боя --- */
+.frame--compact .hp-bar-container { width: 260px; }
+.frame--compact .talents-panel { width: 180px; }
+.frame--compact .fight-bottom-panel { padding: 8px 12px; gap: 12px; }
+.frame--compact .slot { width: 48px; height: 48px; }
+.frame--compact .slot-icon { width: 52px; height: 52px; }
+
+.frame--phone .fight-top-panel { top: 8px; left: 8px; right: 8px; }
+.frame--phone .boss-name-tag { padding: 2px 8px; font-size: 12px; }
+.frame--phone .hp-bar-container { width: 200px; height: 22px; }
+.frame--phone .hp-text { font-size: 11px; line-height: 22px; }
+.frame--phone .fight-timer {
+  top: 8px;
+  right: 8px;
+  padding: 5px 10px;
+  font-size: 16px;
+}
+.frame--phone .fight-arena { height: calc(100% - 86px); }
+.frame--phone .fight-bottom-panel { height: 86px; padding: 6px 8px; gap: 8px; }
+.frame--phone .talents-panel { display: none; }
+.frame--phone .slot { width: 44px; height: 44px; }
+.frame--phone .slot-icon { width: 46px; height: 46px; }
+.frame--phone .slot-count { font-size: 11px; }

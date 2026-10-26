@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { api } from '../api';
 
 interface PlayerState {
   name: string;
@@ -21,10 +22,62 @@ interface PlayerState {
   setMouth: (n: number) => void;
   setMessage: (s: string) => void;
   setLocation: (l: PlayerState['location']) => void;
-  fetchPlayerData: () => Promise<void>; // Новая функция для загрузки
+  /** Применяет к стору любой ответ сервера с данными игрока/баланса. */
+  applyPlayerData: (raw: unknown) => void;
+  fetchPlayerData: () => Promise<void>;
 }
 
-export const usePlayer = create<PlayerState>((set) => ({
+type UnknownRecord = Record<string, unknown>;
+
+const asRecord = (value: unknown): UnknownRecord | null =>
+  value !== null && typeof value === 'object' ? (value as UnknownRecord) : null;
+
+/**
+ * Сервер может отдать данные игрока "плоско" или внутри
+ * player / user / profile / data / balance / wallet.
+ * Собираем все варианты: вложенные объекты имеют приоритет.
+ */
+const collectSources = (raw: unknown): UnknownRecord[] => {
+  const root = asRecord(raw);
+  if (!root) return [];
+
+  const nested = ['player', 'user', 'profile', 'data', 'balance', 'wallet', 'stats']
+    .map((key) => asRecord(root[key]))
+    .filter((item): item is UnknownRecord => item !== null);
+
+  // Внутри player/user тоже может быть balance/wallet/stats
+  const deeper = nested
+    .flatMap((item) =>
+      ['balance', 'wallet', 'stats'].map((key) => asRecord(item[key]))
+    )
+    .filter((item): item is UnknownRecord => item !== null);
+
+  return [...deeper, ...nested, root];
+};
+
+const pickNumber = (sources: UnknownRecord[], keys: string[]): number | undefined => {
+  for (const source of sources) {
+    for (const key of keys) {
+      const value = source[key];
+      if (value === null || value === undefined || value === '') continue;
+      const num = Number(value);
+      if (Number.isFinite(num)) return num;
+    }
+  }
+  return undefined;
+};
+
+const pickString = (sources: UnknownRecord[], keys: string[]): string | undefined => {
+  for (const source of sources) {
+    for (const key of keys) {
+      const value = source[key];
+      if (typeof value === 'string' && value.trim()) return value;
+    }
+  }
+  return undefined;
+};
+
+export const usePlayer = create<PlayerState>((set, get) => ({
   // Начальные значения (фейк, пока грузится)
   name: 'Загрузка...',
   authority: 0,
@@ -47,35 +100,48 @@ export const usePlayer = create<PlayerState>((set) => ({
   setMessage: (message) => set({ message: message.slice(0, 60) }),
   setLocation: (location) => set({ location }),
 
-  // ФУНКЦИЯ ЗАГРУЗКИ С СЕРВЕРА
+  applyPlayerData: (raw) => {
+    const sources = collectSources(raw);
+    if (sources.length === 0) return;
+
+    set((state) => ({
+      name: pickString(sources, ['nickname', 'name', 'login', 'username']) ?? state.name,
+      avatar: pickString(sources, ['avatar', 'avatar_url', 'photo']) ?? state.avatar,
+      cigarettes:
+        pickNumber(sources, [
+          'cigarettes',
+          'cigarette',
+          'cigarets',
+          'cigs',
+          'sigarets',
+          'sigarettes',
+          'sigaret',
+          'sigs',
+          'smoke',
+        ]) ?? state.cigarettes,
+      energy: pickNumber(sources, ['energy', 'stamina']) ?? state.energy,
+      maxEnergy: pickNumber(sources, ['max_energy', 'maxEnergy', 'energy_max']) ?? state.maxEnergy,
+      authority: pickNumber(sources, ['reputation', 'authority', 'rep']) ?? state.authority,
+      rubles:
+        pickNumber(sources, ['rubles', 'rub', 'money', 'cash', 'balance_rubles', 'balance']) ??
+        state.rubles,
+      coins: pickNumber(sources, ['coins', 'coin', 'gold', 'balance_coins']) ?? state.coins,
+      talents: pickNumber(sources, ['talents', 'talent']) ?? state.talents,
+      achievements:
+        pickNumber(sources, ['achievements', 'achievement']) ?? state.achievements,
+      face: pickNumber(sources, ['face', 'face_id']) ?? state.face,
+      mouth: pickNumber(sources, ['mouth', 'mouth_id']) ?? state.mouth,
+    }));
+  },
+
+  // Загрузка данных с сервера. Относительный путь работает и через vite-прокси, и в проде.
   fetchPlayerData: async () => {
     try {
-      const response = await fetch('http://localhost:5173/api/me', {
-        method: 'GET',
-        credentials: 'include', // Важно для куки (сессии)
-        headers: {
-          'Accept': 'application/json',
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error('Ошибка загрузки данных игрока');
-      }
-
-      const data = await response.json();
-
-      // Обновляем стор полученными данными
-      set({
-        name: data.nickname || 'Безымянный',
-        avatar: data.avatar || '',
-        cigarettes: data.cigarettes || 0,
-        energy: data.energy || 0,
-        maxEnergy: data.max_energy || 100,
-        authority: data.reputation || 0, // reputation с сервера -> authority в сторе
-        isLoading: false,
-      });
+      const data = await api('/api/me');
+      get().applyPlayerData(data);
     } catch (error) {
-      console.error('Ошибка:', error);
+      console.error('Не удалось загрузить данные игрока:', error);
+    } finally {
       set({ isLoading: false });
     }
   },

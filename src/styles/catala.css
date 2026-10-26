@@ -129,3 +129,207 @@
   border-radius: 8px;
   color: #000;
 }
+
+.catala-play-btn:disabled,
+.catala-reveal-btn:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.catala-loading {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #0f1a10;
+  color: #ffd966;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+/* Кнопка выхода (раньше у неё вообще не было стилей) */
+.catala-btn-back {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  z-index: 40;
+  padding: 8px 14px;
+  color: #fff;
+  font-weight: bold;
+  cursor: pointer;
+  background: rgba(0, 0, 0, 0.62);
+  border: 1px solid #c9a24a;
+  border-radius: 6px;
+}
+.catala-btn-back:hover {
+  background: rgba(0, 0, 0, 0.82);
+}
+
+/* Сообщения за столом (раньше были скрыты за фоновой картинкой) */
+.catala-message {
+  position: absolute;
+  top: 3%;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 30;
+  min-width: 240px;
+  max-width: min(520px, 80%);
+  padding: 8px 16px;
+  text-align: center;
+  pointer-events: none;
+  background: rgba(0, 0, 0, 0.62);
+  border: 1px solid rgba(255, 214, 102, 0.45);
+  border-radius: 10px;
+}
+.catala-message-text {
+  color: #fff;
+  font-size: 16px;
+  font-weight: bold;
+  text-shadow: 0 2px 4px #000;
+}
+
+/* Окно результата: явно показываем выигрыш и награду */
+.catala-result {
+  position: absolute;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(0, 0, 0, 0.66);
+  backdrop-filter: blur(2px);
+}
+
+.catala-result-card {
+  width: min(360px, 92%);
+  padding: 22px 20px 18px;
+  color: #3a2410;
+  text-align: center;
+  background: linear-gradient(#f6e7bd, #d7b46c);
+  border: 3px solid #5a3200;
+  border-radius: 14px;
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.65);
+  position: relative;
+}
+
+.catala-result-close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 26px;
+  height: 26px;
+  font-size: 13px;
+  font-weight: bold;
+  color: #fff;
+  cursor: pointer;
+  background: #c00;
+  border: 2px solid #fff;
+  border-radius: 50%;
+}
+.catala-result-card.win {
+  border-color: #2e7d32;
+  box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.35), 0 20px 45px rgba(0, 0, 0, 0.65);
+}
+.catala-result-card.lose {
+  border-color: #7a1010;
+}
+
+.catala-result-title {
+  font-size: 26px;
+  font-weight: bold;
+  letter-spacing: 1px;
+  color: #2e7d32;
+  text-shadow: 0 2px 0 rgba(255, 255, 255, 0.4);
+}
+.catala-result-card.lose .catala-result-title {
+  color: #a01818;
+}
+
+.catala-result-combo {
+  margin-top: 6px;
+  font-size: 14px;
+  font-weight: bold;
+  color: #6a4a24;
+}
+
+.catala-result-reward {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 12px;
+  font-size: 22px;
+  font-weight: bold;
+  color: #1c6b1c;
+}
+.catala-result-reward-icon {
+  font-size: 28px;
+}
+
+.catala-result-message {
+  margin-top: 10px;
+  font-size: 13px;
+  color: #5a4326;
+}
+
+.catala-result-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.catala-result-btn {
+  flex: 1;
+  padding: 10px 12px;
+  font-size: 14px;
+  font-weight: bold;
+  color: #3a2410;
+  cursor: pointer;
+  background: linear-gradient(#fff2b0, #e0a020);
+  border: 2px solid #7a4300;
+  border-radius: 8px;
+}
+.catala-result-btn--primary {
+  color: #fff;
+  text-shadow: 1px 1px 0 #000;
+  background: linear-gradient(#5aa02a, #2f6b12);
+  border-color: #234d0c;
+}
+.catala-result-btn:hover:not(:disabled) {
+  filter: brightness(1.08);
+}
+.catala-result-btn:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+/* --- Адаптив стола --- */
+.frame--compact .table-slot {
+  width: 72px;
+  height: 110px;
+  font-size: 14px;
+}
+.frame--compact .pg-card-suit { font-size: 18px; }
+.frame--compact .catala-btn-back { top: 10px; left: 10px; padding: 6px 10px; font-size: 12px; }
+.frame--compact .catala-message { max-width: 70%; }
+.frame--compact .catala-result-card { width: min(320px, 90%); padding: 16px; }
+
+.frame--phone .catala-message { top: 2%; width: 88%; min-width: 0; }
+.frame--phone .catala-message-text { font-size: 13px; }
+.frame--phone .table-slot {
+  width: 62px;
+  height: 96px;
+  padding: 3px;
+  font-size: 12px;
+}
+.frame--phone .pg-card-suit { font-size: 16px; }
+.frame--phone .table-slot--dealer-1 { top: 10%; left: 24%; }
+.frame--phone .table-slot--dealer-2 { top: 10%; left: 40%; }
+.frame--phone .table-slot--deck { display: none; }
+.frame--phone .table-slot--player-0 { top: 34%; left: 34%; }
+.frame--phone .table-slot--player-1 { top: 34%; left: 51%; }
+.frame--phone .catala-reveal-block { bottom: 2%; }
+.frame--phone .catala-play-btn { font-size: 16px; padding: 8px 14px; }
+.frame--phone .catala-result-title { font-size: 22px; }

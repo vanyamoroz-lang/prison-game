@@ -1,50 +1,43 @@
 ﻿import { useState, useEffect, useRef } from 'react';
+import type { ActiveBossFight, BossFightReward, BossWeaponInventory } from './bossTypes';
 import '../styles/BossFightScene.css';
 
 interface Props {
-  fight: {
-    bossId: number;
-    name: string;
-    img_boss: string;
-    currentHp: number;
-    maxHp: number;
-    endTime: number;
-    serverTime: number;
-    inventory?: { knife: number; poison: number; pistol: number };
-  };
+  fight: ActiveBossFight;
   mode: string;
-  onClose: (result: 'win' | 'lose', reward?: any) => void;
+  onClose: (result: 'win' | 'lose', reward?: BossFightReward) => void;
 }
 
-export default function BossFightScene({ fight, mode, onClose }: Props) {
+export default function BossFightScene({ fight, onClose }: Props) {
   const [currentHp, setCurrentHp] = useState(fight.currentHp);
-  const [timeLeft, setTimeLeft] = useState<number>(0);
-  const [inventory, setInventory] = useState(
+  const [timeLeft, setTimeLeft] = useState<number>(() =>
+    Math.max(0, Math.floor((fight.endTime - fight.serverTime) / 1000))
+  );
+  const [inventory, setInventory] = useState<BossWeaponInventory>(
     fight.inventory || { knife: 0, poison: 0, pistol: 0 }
   );
   const [isAttacking, setIsAttacking] = useState(false);
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const onCloseRef = useRef(onClose);
+
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  }, [onClose]);
 
   // === ТАЙМЕР ===
   useEffect(() => {
-    const initial = Math.max(0, Math.floor((fight.endTime - fight.serverTime) / 1000));
-    setTimeLeft(initial);
-
     timerRef.current = setInterval(() => {
-      setTimeLeft((prev) => {
-        if (prev <= 1) {
-          if (timerRef.current) clearInterval(timerRef.current);
-          onClose('lose');
-          return 0;
-        }
-        return prev - 1;
-      });
+      setTimeLeft((prev) => Math.max(0, prev - 1));
     }, 1000);
 
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
-  }, [fight.endTime, fight.serverTime, onClose]);
+  }, []);
+
+  useEffect(() => {
+    if (timeLeft === 0) onCloseRef.current('lose');
+  }, [timeLeft]);
 
   const hpPercent = (currentHp / fight.maxHp) * 100;
 

@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback, useRef }  from 'react';
 import { api } from '../api';
 import { usePlayer } from '../store/playerStore';
 import GameChoiceModal from './gambling/GameChoiceModal';
+import WeaponShopModal from './WeaponShopModal';
 
 const ICON_CIGARETTE = '/assets/icons/sbor_smoke.png';
 
@@ -33,6 +34,7 @@ const formatTime = (sec: number) => {
 
 export default function YardScene() {
   const [showChoice, setShowChoice] = useState(false);
+  const [showShop, setShowShop] = useState(false);
   const [yard, setYard] = useState<YardState | null>(null);
   const [now, setNow] = useState(() => Date.now() / 1000);
   const [busy, setBusy] = useState<string | null>(null);
@@ -50,6 +52,8 @@ export default function YardScene() {
 
   // Первичная загрузка двора
   useEffect(() => {
+    // Данные приходят асинхронно, setYard вызывается уже после ответа сервера.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     load();
   }, [load]);
 
@@ -79,7 +83,9 @@ export default function YardScene() {
         body: JSON.stringify({ slotId }),
       });
       setYard(data.yard_state);
-      usePlayer.setState({ cigarettes: data.cigarettes }); // TopBar обновится сам
+      // Сервер может вернуть вместе с двором и другие балансы —
+      // применяем всё сразу, чтобы TopBar не отставал.
+      usePlayer.getState().applyPlayerData(data);
     } catch (err) {
       console.error(err);
       load();
@@ -131,7 +137,16 @@ return (
         alt=""
         onClick={() => setShowChoice(true)}
       />
+      <button
+        className="yard-shop-btn"
+        onClick={() => setShowShop(true)}
+        aria-label="Купить оружие"
+      >
+        <img src="/assets/icons/gun.png" alt="" />
+        <span>Оружие</span>
+      </button>
       {showChoice && <GameChoiceModal onClose={() => setShowChoice(false)} />}
+      {showShop && <WeaponShopModal onClose={() => setShowShop(false)} />}
     </>
   );
 }
