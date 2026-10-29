@@ -22,9 +22,18 @@ interface FinishResult {
   message: string;
 }
 
+interface LevelInfo {
+  level: number;
+  expInLevel: number;
+  expToNext: number;
+  gamesToNext: number | null;
+  expGained: number;
+  levelsGained: number;
+}
+
 const REWARD_META: Record<string, { title: string; icon: string }> = {
   rubles: { title: 'рублей', icon: '₽' },
-  cigarettes: { title: 'сигарет', icon: '/assets/icons/smoke1.png' }
+  cigarettes: { title: 'сигарет', icon: '/assets/icons/smoke1.png' },
 };
 
 const asRecord = (value: unknown): Record<string, unknown> | null =>
@@ -34,18 +43,17 @@ const CIGARETTE_ICON = '/assets/icons/smoke1.png';
 
 // Строки сверху вниз, как на картинке. Последняя строка (рубашки) — скрытая комбинация.
 const COMBO_ROWS: { key: string; label: string; reward: number | null }[] = [
-  { key: 'A',    label: 'A',  reward: 2500 },
-  { key: 'K',    label: 'K',  reward: 2000 },
-  { key: 'Q',    label: 'Q',  reward: 1500 },
-  { key: 'J',    label: 'J',  reward: 1000 },
-  { key: '10',   label: '10', reward: 800 },
-  { key: '9',    label: '9',  reward: 700 },
-  { key: '8',    label: '8',  reward: 500 },
-  { key: '7',    label: '7',  reward: 300 },
-  { key: 'back', label: '',   reward: 100 },
+  { key: 'A', label: 'A', reward: 2500 },
+  { key: 'K', label: 'K', reward: 1500 },
+  { key: 'Q', label: 'Q', reward: 1000 },
+  { key: 'J', label: 'J', reward: 800 },
+  { key: '10', label: '10', reward: 700 },
+  { key: '9', label: '9', reward: 600 },
+  { key: '8', label: '8', reward: 500 },
+  { key: '7', label: '7', reward: 300 },
+  { key: 'back', label: '', reward: 100 },
 ];
 
-// Положение строк в процентах от высоты фона
 const ROW_TOP_START = 26;
 const ROW_STEP = 8.3;
 
@@ -58,10 +66,6 @@ const toNumber = (value: unknown): number | undefined => {
 const toStringOrNull = (value: unknown): string | null =>
   typeof value === 'string' && value.trim() ? value : null;
 
-/**
- * Сервер может называть поля по-разному, поэтому поддерживаем
- * несколько вариантов + вложенный объект reward.
- */
 const parseFinishResult = (raw: unknown): FinishResult => {
   const data = asRecord(raw);
   if (!data) {
@@ -101,12 +105,23 @@ const parseFinishResult = (raw: unknown): FinishResult => {
     toStringOrNull(data.combo_label) ??
     toStringOrNull(data.hand_name);
 
+  return { win, rewardType, rewardAmount, combo, message };
+};
+
+const parseLevelInfo = (raw: unknown): Partial<LevelInfo> | null => {
+  const data = asRecord(raw);
+  if (!data) return null;
+
+  const level = toNumber(data.level);
+  if (level === undefined) return null;
+
   return {
-    win,
-    rewardType,
-    rewardAmount,
-    combo,
-    message,
+    level,
+    expInLevel: toNumber(data.exp_in_level) ?? 0,
+    expToNext: toNumber(data.exp_to_next_level) ?? 100,
+    gamesToNext: toNumber(data.games_to_next_level) ?? null,
+    expGained: toNumber(data.exp_gained) ?? 0,
+    levelsGained: toNumber(data.levels_gained) ?? 0,
   };
 };
 
@@ -126,10 +141,22 @@ export default function CatalaPage() {
   const applyPlayerData = usePlayer((s) => s.applyPlayerData);
 
   const [gameState, setGameState] = useState<GameState | null>(null);
+  const [level, setLevel] = useState<LevelInfo>({
+    level: 1,
+    expInLevel: 0,
+    expToNext: 100,
+    gamesToNext: null,
+    expGained: 0,
+    levelsGained: 0,
+  });
   const [message, setMessage] = useState('');
   const [result, setResult] = useState<FinishResult | null>(null);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
+
+  const levelTotal = level.expInLevel + level.expToNext;
+  const levelProgress =
+    levelTotal > 0 ? Math.min(100, (level.expInLevel / levelTotal) * 100) : 0;
 
   const getRankName = (rank: number) => {
     if (rank === 11) return 'J';
@@ -143,7 +170,11 @@ export default function CatalaPage() {
 
   useEffect(() => {
     api('/api/pairgame')
-      .then((data: GameState) => setGameState(data))
+      .then((data: GameState) => {
+        setGameState(data);
+        const levelParsed = parseLevelInfo(data);
+        if (levelParsed) setLevel((prev) => ({ ...prev, ...levelParsed }));
+      })
       .catch((err: unknown) =>
         setMessage(err instanceof Error ? err.message : 'Не удалось загрузить стол')
       )
@@ -158,6 +189,8 @@ export default function CatalaPage() {
     try {
       const data = await api('/api/pairgame/start', { method: 'POST' });
       setGameState({ active: true, hand: data.hand, swapsLeft: data.swapsLeft });
+      const levelParsed = parseLevelInfo(data);
+      if (levelParsed) setLevel((prev) => ({ ...prev, ...levelParsed }));
       setMessage('Выбери карту для замены или вскрывайся!');
     } catch (err) {
       setMessage(err instanceof Error ? err.message : 'Не удалось начать игру');
@@ -197,8 +230,9 @@ export default function CatalaPage() {
       setMessage(parsed.message);
       setResult(parsed);
 
-      // Если сервер вернул баланс прямо в ответе — применяем его,
-      // затем добираем актуальные данные игрока для TopBar.
+      const levelParsed = parseLevelInfo(data);
+      if (levelParsed) setLevel((prev) => ({ ...prev, ...levelParsed }));
+
       applyPlayerData(data);
       void fetchPlayerData();
     } catch (err) {
@@ -221,42 +255,59 @@ export default function CatalaPage() {
   return (
     <div className="catala-page">
       <img className="catala-bg" src="/assets/bg/catala-table1.png" alt="Стол" />
+
+      <div className="catala-level">
+        <div className="catala-level-label">Ур. {level.level}</div>
+        <div className="catala-level-bar">
+          <div className="catala-level-fill" style={{ height: `${levelProgress}%` }} />
+        </div>
+        <div className="catala-level-percent">{Math.floor(levelProgress)}%</div>
+        {level.gamesToNext !== null && (
+          <div className="catala-level-hint">ещё {level.gamesToNext} игр</div>
+        )}
+        {level.expGained > 0 && (
+          <div className="catala-level-gain">+{level.expGained} опыта</div>
+        )}
+        {level.levelsGained > 0 && (
+          <div className="catala-level-up">LEVEL UP! +{level.levelsGained}</div>
+        )}
+      </div>
+
       <div className="catala-combos" aria-hidden="true">
-  {COMBO_ROWS.map((row, i) => (
-    <div
-      key={row.key}
-      className="catala-combo-row"
-      style={{ top: `${ROW_TOP_START + i * ROW_STEP}%` }}
-    >
-      {row.reward !== null ? (
-        <>
-          <span className="catala-combo-icon">{renderRewardIcon(CIGARETTE_ICON)}</span>
-          <span className="catala-combo-amount">
-            {row.reward.toLocaleString('ru-RU')}
-          </span>
-        </>
-      ) : (
-        <span className="catala-combo-amount catala-combo-amount--empty">—</span>
-      )}
-    </div>
-  ))}
-</div>
+        {COMBO_ROWS.map((row, i) => (
+          <div
+            key={row.key}
+            className="catala-combo-row"
+            style={{ top: `${ROW_TOP_START + i * ROW_STEP}%` }}
+          >
+            {row.reward !== null ? (
+              <>
+                <span className="catala-combo-icon">{renderRewardIcon(CIGARETTE_ICON)}</span>
+                <span className="catala-combo-amount">
+                  {row.reward.toLocaleString('ru-RU')}
+                </span>
+              </>
+            ) : (
+              <span className="catala-combo-amount catala-combo-amount--empty">—</span>
+            )}
+          </div>
+        ))}
+      </div>
+
       <div className="catala-jackpot" role="status">
-  СОРВАЛ КУШ!
-</div>
+        СОРВАЛ КУШ!
+      </div>
+
       <button className="catala-btn-back" onClick={exitToYard}>
         ← Выйти
       </button>
 
       <div className="catala-table">
-        {/* Карты дилера (слева) */}
         <div className="table-slot table-slot--dealer-1" />
         <div className="table-slot table-slot--dealer-2" />
 
-        {/* Колода (в центре) */}
         <div className="table-slot table-slot--deck" />
 
-        {/* Карты игрока (справа). Класс формируется динамически (player-0, player-1) */}
         {gameState?.hand?.map((card, i) => (
           <div
             key={i}
@@ -276,7 +327,6 @@ export default function CatalaPage() {
           </div>
         ))}
 
-        {/* UI Взаимодействия */}
         {!gameState?.active ? (
           <button className="catala-play-btn" onClick={handleStart} disabled={busy}>
             {busy ? 'Раздача...' : 'Начать игру'}
@@ -316,7 +366,9 @@ export default function CatalaPage() {
 
             {showReward && rewardMeta && (
               <div className="catala-result-reward">
-                <span className="catala-result-reward-icon">{renderRewardIcon(rewardMeta.icon)}</span>
+                <span className="catala-result-reward-icon">
+                  {renderRewardIcon(rewardMeta.icon)}
+                </span>
                 <span>
                   +{result.rewardAmount.toLocaleString('ru-RU')} {rewardMeta.title}
                 </span>
@@ -343,5 +395,3 @@ export default function CatalaPage() {
     </div>
   );
 }
-
-

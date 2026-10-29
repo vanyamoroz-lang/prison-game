@@ -1,7 +1,7 @@
 import { usePlayer } from '../store/playerStore';
 
 const LOCATIONS = [
-  { id: 'cell',   icon: '🛏️', title: 'Камера' },
+  { id: 'camera',   icon: '🛏️', title: 'Камера' },
   { id: 'zones',  icon: '🗺️', title: 'Зоны' },
   { id: 'yard',   icon: '🏢', title: 'Двор' },
   { id: 'bosses', icon: '👹', title: 'Боссы' },

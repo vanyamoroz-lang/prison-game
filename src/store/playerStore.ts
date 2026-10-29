@@ -15,7 +15,7 @@ interface PlayerState {
   face: number;
   mouth: number;
   message: string;
-  location: 'cell' | 'yard' | 'zones' | 'bosses' | 'catala' | 'poker';
+  location: 'camera' | 'yard' | 'zones' | 'bosses' | 'catala' | 'poker';
   isLoading: boolean;
 
   setFace: (n: number) => void;
@@ -92,7 +92,7 @@ export const usePlayer = create<PlayerState>((set, get) => ({
   face: 0,
   mouth: 0,
   message: 'введи базар',
-  location: 'cell',
+  location: 'camera',
   isLoading: true,
 
   setFace: (face) => set({ face }),

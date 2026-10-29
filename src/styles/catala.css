@@ -402,3 +402,87 @@
   0%, 100% { transform: rotate(16deg) scale(1); }
   50%      { transform: rotate(-16deg) scale(1.08); }
 }
+
+.catala-page,
+.catala-loading {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  color: #fff;
+  font-family: inherit;
+}
+
+.catala-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #3a2410;
+}
+
+/* Шкала уровня слева, как в покере */
+.catala-level {
+  position: absolute;
+  left: 8px;
+  top: 56%;
+  transform: translateY(-50%);
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  pointer-events: none;
+}
+
+.catala-level-label {
+  font-weight: bold;
+  text-shadow: 0 2px 4px #000;
+}
+
+.catala-level-bar {
+  position: relative;
+  width: 26px;
+  height: 360px;
+  background: rgba(0, 0, 0, 0.7);
+  border: 2px solid #c9a24a;
+  border-radius: 13px;
+  overflow: hidden;
+  display: flex;
+  align-items: flex-end;
+}
+
+.catala-level-fill {
+  width: 90%;
+  background: linear-gradient(to top, #b8860b, #ffd966);
+  transition: height 0.6s ease-out;
+  box-shadow: 0 0 20px #ffd966;
+}
+
+.catala-level-percent {
+  font-size: 12px;
+  text-shadow: 0 2px 4px #000;
+}
+
+.catala-level-hint {
+  font-size: 12px;
+  text-shadow: 0 2px 4px #000;
+  text-align: center;
+}
+
+.catala-level-gain {
+  font-size: 12px;
+  color: #9be37a;
+  text-shadow: 0 2px 4px #000;
+}
+
+.catala-level-up {
+  font-size: 12px;
+  font-weight: bold;
+  color: #ffe066;
+  text-shadow: 0 2px 4px #000;
+}
+
+.frame--compact .catala-level-bar { width: 22px; height: 240px; }
+.frame--phone .catala-level { left: 4px; }
+.frame--phone .catala-level-bar { width: 18px; height: 150px; }
+.frame--phone .catala-level-label { font-size: 11px; }
+.frame--phone .catala-level-percent { font-size: 10px; }
