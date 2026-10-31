@@ -33,6 +33,7 @@ const formatTime = (sec: number) => {
 };
 
 export default function YardScene() {
+  const setLocation = usePlayer((s) => s.setLocation);
   const [showChoice, setShowChoice] = useState(false);
   const [showShop, setShowShop] = useState(false);
   const [yard, setYard] = useState<YardState | null>(null);
@@ -137,6 +138,15 @@ return (
         alt=""
         onClick={() => setShowChoice(true)}
       />
+      <button
+        type="button"
+        className="yard-collection-btn"
+        onClick={() => setLocation('collection')}
+        aria-label="Коллекция"
+      >
+        <span className="yard-collection-btn-icon" aria-hidden="true">🎒</span>
+        <span>Коллекция</span>
+      </button>
       <button
         className="yard-shop-btn"
         onClick={() => setShowShop(true)}

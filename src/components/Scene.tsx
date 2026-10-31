@@ -7,6 +7,7 @@ import BossesPage from './BossesPage';
 import YardScene from './YardScene';
 import CatalaPage from "./gambling/CatalaPage";
 import PokerPage from "./gambling/PokerPage";
+import CollectionPage from "./npc/CollectionPage";
 
 const BACKGROUNDS: Record<string, string | null> = {
   camera: '/assets/bg/camera.png',
@@ -14,6 +15,7 @@ const BACKGROUNDS: Record<string, string | null> = {
   zones: null,
   bosses: null,
   poker: null,
+  collection: null,
 };
 
 export default function Scene() {
@@ -30,6 +32,7 @@ export default function Scene() {
         {location === 'yard' && <YardScene />}
         {location === 'catala' && <CatalaPage />}
         {location === 'poker' && <PokerPage onExit={() => setLocation('camera')} />}
+        {location === 'collection' && <CollectionPage onExit={() => setLocation('yard')} />}
         {location === 'zones' && <ZonesPage />}
         {location === 'bosses' && <BossesPage />}
         {showLeftPanel && <LeftPanel />}

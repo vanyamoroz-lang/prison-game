@@ -8,6 +8,7 @@ interface PlayerState {
   maxEnergy: number;
   coins: number;
   cigarettes: number;
+  hammers: number;
   rubles: number;
   avatar: string;
   achievements: number;
@@ -15,7 +16,7 @@ interface PlayerState {
   face: number;
   mouth: number;
   message: string;
-  location: 'camera' | 'yard' | 'zones' | 'bosses' | 'catala' | 'poker';
+  location: 'camera' | 'yard' | 'zones' | 'bosses' | 'catala' | 'poker' | 'collection';
   isLoading: boolean;
 
   setFace: (n: number) => void;
@@ -85,6 +86,7 @@ export const usePlayer = create<PlayerState>((set, get) => ({
   maxEnergy: 100,
   coins: 0,
   cigarettes: 0,
+  hammers: 0,
   rubles: 0,
   avatar: '',
   achievements: 0,
@@ -119,6 +121,15 @@ export const usePlayer = create<PlayerState>((set, get) => ({
           'sigs',
           'smoke',
         ]) ?? state.cigarettes,
+      hammers:
+        pickNumber(sources, [
+          'hammers',
+          'hammer',
+          'hammers_count',
+          'hammersCount',
+          'molotki',
+          'molotok',
+        ]) ?? state.hammers,
       energy: pickNumber(sources, ['energy', 'stamina']) ?? state.energy,
       maxEnergy: pickNumber(sources, ['max_energy', 'maxEnergy', 'energy_max']) ?? state.maxEnergy,
       authority: pickNumber(sources, ['reputation', 'authority', 'rep']) ?? state.authority,

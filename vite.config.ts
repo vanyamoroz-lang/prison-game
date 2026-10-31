@@ -13,6 +13,11 @@ export default defineConfig({
         target: 'http://212.192.210.49:3000',
         changeOrigin: true,
       },
+      // Иконки коллекции отдаёт бэкенд (/img/collection/*.png) — в dev их тоже проксируем.
+      '/img': {
+        target: 'http://212.192.210.49:3000',
+        changeOrigin: true,
+      },
     },
   },
 })

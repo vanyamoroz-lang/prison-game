@@ -1,4 +1,14 @@
-﻿export async function api(endpoint: string, options: RequestInit = {}) {
+﻿export class ApiError extends Error {
+  status: number;
+
+  constructor(message: string, status: number) {
+    super(message);
+    this.name = 'ApiError';
+    this.status = status;
+  }
+}
+
+export async function api(endpoint: string, options: RequestInit = {}) {
   // Заголовки собираем через Headers, чтобы не потерять Content-Type,
   // если в options передан собственный headers.
   const headers = new Headers(options.headers);
@@ -12,7 +22,7 @@
 
   if (!res.ok) {
     const errorData = await res.json().catch(() => ({}));
-    throw new Error(errorData.error || 'Ошибка сервера');
+    throw new ApiError(errorData.error || 'Ошибка сервера', res.status);
   }
   return res.json();
 }

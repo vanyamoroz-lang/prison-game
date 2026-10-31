@@ -178,8 +178,9 @@
   50%      { transform: translate(-50%, -50%) scale(1.06); }
 }
 
-/* ===== Кнопка оружейки во дворе ===== */
-.yard-shop-btn {
+/* ===== Кнопка оружейки и коллекции во дворе ===== */
+.yard-shop-btn,
+.yard-collection-btn {
   position: absolute;
   left: 14px;
   bottom: 14px;
@@ -204,12 +205,23 @@
   height: 30px;
   object-fit: contain;
 }
-.yard-shop-btn:hover {
+.yard-shop-btn:hover,
+.yard-collection-btn:hover {
   filter: brightness(1.15);
   transform: translateY(-1px);
 }
-.yard-shop-btn:active {
+.yard-shop-btn:active,
+.yard-collection-btn:active {
   transform: scale(0.97);
+}
+
+/* Кнопка «Коллекция» стоит над кнопкой «Оружие» */
+.yard-collection-btn {
+  bottom: 66px;
+}
+.yard-collection-btn-icon {
+  font-size: 22px;
+  line-height: 1;
 }
 
 /* ===== Магазин оружия ===== */
@@ -395,6 +407,15 @@
 .frame--compact .yard-shop-btn img {
   width: 24px;
   height: 24px;
+}
+.frame--compact .yard-collection-btn {
+  left: 10px;
+  bottom: 56px;
+  padding: 6px 10px;
+  font-size: 12px;
+}
+.frame--compact .yard-collection-btn-icon {
+  font-size: 18px;
 }
 .frame--compact .weapon-shop {
   width: min(340px, 92%);
