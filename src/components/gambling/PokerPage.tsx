@@ -61,29 +61,63 @@ const normRank = (r: unknown): string => {
   return RANKS[s.toLowerCase()] ?? s.toUpperCase();
 };
 
-const normSuit = (s: unknown): string => {
-  const str = String(s ?? '').trim();
-  return SUITS[str.toLowerCase()] ?? (str || '?');
+// Порядок мастей как в Катале: 0 — ♣, 1 — ♦, 2 — ♥, 3 — ♠.
+const SUIT_ORDER = ['♣', '♦', '♥', '♠'];
+
+/** Числовой индекс масти (0..3 как в Катале или 1..4) → символ. */
+const suitFromIndex = (index: number, oneBased: boolean): string => {
+  const i = oneBased ? index - 1 : index;
+  return SUIT_ORDER[i] ?? '?';
 };
 
-/** Карта может прийти строкой ("AS", "10h", "K♠") или объектом ({ rank, suit }). */
-const parseCard = (raw: unknown): Card => {
-  let rank = '?';
-  let suit = '?';
+/** Масть может прийти числом или числовой строкой ("0", "1"...). */
+const toSuitIndex = (value: unknown): number | null => {
+  if (typeof value === 'number' && Number.isFinite(value)) return value;
+  if (typeof value === 'string' && /^-?\d+$/.test(value.trim())) return Number(value.trim());
+  return null;
+};
 
+const normSuit = (s: unknown): string => {
+  const index = toSuitIndex(s);
+  if (index !== null) return suitFromIndex(index, false);
+  const str = String(s ?? '').trim();
+  // Убираем разделители ("spades_", "suit: h"), чтобы не терять названия мастей.
+  const key = str.toLowerCase().replace(/[^a-zа-яё♠♥♦♣]/gi, '');
+  return SUITS[key] ?? '?';
+};
+
+/** Карта может прийти строкой ("AS", "10h", "K♠", "♠A") или объектом ({ rank, suit }). */
+const readCard = (raw: unknown): { rank: string; suit: unknown } => {
   if (typeof raw === 'string') {
-    const m = raw.trim().match(/^(10|1[1-4]|[2-9TJQKA])\s*(.+)$/i);
-    if (m) {
-      rank = normRank(m[1]);
-      suit = normSuit(m[2]);
-    }
-  } else if (raw !== null && typeof raw === 'object') {
-    const o = raw as Record<string, unknown>;
-    rank = normRank(o.rank ?? o.value ?? o.r);
-    suit = normSuit(o.suit ?? o.s);
+    const str = raw.trim();
+    const direct = str.match(/^(10|1[1-4]|[2-9TJQKA])\s*(.+)$/i);
+    if (direct) return { rank: normRank(direct[1]), suit: direct[2] };
+    const reversed = str.match(/^(.+?)\s*(10|1[1-4]|[2-9TJQKA])$/i);
+    if (reversed) return { rank: normRank(reversed[2]), suit: reversed[1] };
+    return { rank: normRank(str), suit: '?' };
   }
 
-  return { rank, suit, red: suit === '♥' || suit === '♦' };
+  if (raw !== null && typeof raw === 'object') {
+    const o = raw as Record<string, unknown>;
+    return { rank: normRank(o.rank ?? o.value ?? o.r), suit: o.suit ?? o.s ?? '?' };
+  }
+
+  return { rank: '?', suit: '?' };
+};
+
+/**
+ * Разбираем руку целиком: так можно понять, масти пришли 0-based (как в Катале)
+ * или 1-based — если встретился индекс 4, значит нумерация начинается с единицы.
+ */
+const parseHand = (hand: unknown[]): Card[] => {
+  const rawCards = hand.map(readCard);
+  const oneBased = rawCards.some(({ suit }) => toSuitIndex(suit) === 4);
+
+  return rawCards.map(({ rank, suit }) => {
+    const index = toSuitIndex(suit);
+    const symbol = index === null ? normSuit(suit) : suitFromIndex(index, oneBased);
+    return { rank, suit: symbol, red: symbol === '♥' || symbol === '♦' };
+  });
 };
 
 const REWARD_NAMES: Record<string, string> = {
@@ -212,7 +246,8 @@ export default function PokerPage({ onExit }: Props) {
   const total = inLevel + toNext;
   const progress = total > 0 ? Math.min(100, (inLevel / total) * 100) : 0;
 
-  const hand: Card[] = Array.isArray(data?.hand) ? data!.hand!.map(parseCard) : [];
+  const rawHand = data?.hand;
+  const hand: Card[] = Array.isArray(rawHand) ? parseHand(rawHand) : [];
   const swapsLeft = data?.swapsLeft ?? 0;
   const canSwap = active && !busy && swapsLeft > 0;
 
@@ -251,16 +286,12 @@ export default function PokerPage({ onExit }: Props) {
         {hand.map((c: Card, i: number) => (
           <button
             key={`${i}-${c.rank}${c.suit}`}
-            className={`poker-card ${c.red ? 'red' : ''} ${canSwap ? 'swappable' : ''}`}
+            className={`poker-card ${c.red ? 'red' : 'black'} ${canSwap ? 'swappable' : ''}`}
             disabled={!canSwap}
             onClick={() => handleChange(i)}
             title={canSwap ? 'Заменить карту' : ''}
           >
-            <span className="poker-card-corner">
-              {c.rank}
-              <br />
-              {c.suit}
-            </span>
+            <span className="poker-card-value">{c.rank}</span>
             <span className="poker-card-suit">{c.suit}</span>
           </button>
         ))}
