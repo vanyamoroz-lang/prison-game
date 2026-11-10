@@ -15,12 +15,14 @@ interface PlayerState {
   talents: number;
   face: number;
   mouth: number;
+  nose: number;
   message: string;
   location: 'camera' | 'yard' | 'zones' | 'bosses' | 'catala' | 'poker' | 'collection';
   isLoading: boolean;
 
   setFace: (n: number) => void;
   setMouth: (n: number) => void;
+  setNose: (n: number) => void;
   setMessage: (s: string) => void;
   setLocation: (l: PlayerState['location']) => void;
   /** Применяет к стору любой ответ сервера с данными игрока/баланса. */
@@ -93,12 +95,14 @@ export const usePlayer = create<PlayerState>((set, get) => ({
   talents: 0,
   face: 0,
   mouth: 0,
+  nose: 0,
   message: 'введи базар',
   location: 'camera',
   isLoading: true,
 
   setFace: (face) => set({ face }),
   setMouth: (mouth) => set({ mouth }),
+  setNose: (nose) => set({ nose }),
   setMessage: (message) => set({ message: message.slice(0, 60) }),
   setLocation: (location) => set({ location }),
 
@@ -142,6 +146,7 @@ export const usePlayer = create<PlayerState>((set, get) => ({
         pickNumber(sources, ['achievements', 'achievement']) ?? state.achievements,
       face: pickNumber(sources, ['face', 'face_id']) ?? state.face,
       mouth: pickNumber(sources, ['mouth', 'mouth_id']) ?? state.mouth,
+      nose: pickNumber(sources, ['nose', 'nose_id']) ?? state.nose,
     }));
   },
 

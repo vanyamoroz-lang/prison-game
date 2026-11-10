@@ -1,0 +1,238 @@
+.character {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: 100%;
+  height: 92%;
+  transform: translateX(-50%);
+  z-index: 2;
+}
+
+.character-canvas {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: 1376px;
+  height: 768px;
+  margin-left: -688px;
+  transform-origin: bottom center;
+  will-change: transform;
+  pointer-events: none;
+}
+
+.character-body {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  user-select: none;
+}
+
+.character-hand {
+  position: absolute;
+  z-index: 3;
+  pointer-events: none;
+}
+
+.face-layer {
+  position: absolute;
+  z-index: 4;
+  pointer-events: none;
+  user-select: none;
+}
+
+.face-menu-trigger {
+  position: absolute;
+  left: 10px;
+  bottom: 10px;
+  z-index: 20;
+  padding: 8px 13px;
+  color: #2b1a04;
+  font-size: 13px;
+  font-weight: 700;
+  background: linear-gradient(#ffe36a, #d9a400);
+  border: 2px solid #7a4300;
+  border-radius: 8px;
+  box-shadow: 0 2px 0 #5a3200;
+  cursor: pointer;
+}
+
+.face-menu-trigger:hover {
+  filter: brightness(1.08);
+}
+
+.face-menu-trigger:active {
+  transform: translateY(1px);
+  box-shadow: none;
+}
+
+.face-menu-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.58);
+}
+
+.face-menu {
+  display: flex;
+  flex-direction: column;
+  width: min(460px, 100%);
+  max-height: 100%;
+  overflow: hidden;
+  color: #f5e6c8;
+  background: #2a1a10;
+  border: 3px solid #c89a3a;
+  border-radius: 10px;
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.55);
+}
+
+.face-menu-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 10px;
+  background: linear-gradient(#5a3a1a, #3a2410);
+  border-bottom: 2px solid #c89a3a;
+}
+
+.face-menu-head h3 {
+  margin: 0;
+  color: #ffe8a8;
+  font-size: 16px;
+}
+
+.face-menu-close {
+  width: 28px;
+  height: 28px;
+  flex: 0 0 auto;
+  padding: 0;
+  color: #fff;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1;
+  background: #8a2a1a;
+  border: 2px solid #c89a3a;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.face-menu-close:hover {
+  filter: brightness(1.15);
+}
+
+.face-menu-tabs {
+  display: flex;
+  gap: 4px;
+  padding: 6px;
+  background: #1e120a;
+}
+
+.face-menu-tab {
+  flex: 1;
+  padding: 6px 4px;
+  color: #d8c49a;
+  font-size: 12px;
+  font-weight: 700;
+  background: #3a2410;
+  border: 1px solid #7a4300;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.face-menu-tab.active {
+  color: #2b1a04;
+  background: linear-gradient(#ffe36a, #d9a400);
+  border-color: #ffe36a;
+}
+
+.face-menu-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 5px;
+  padding: 8px;
+  overflow-y: auto;
+}
+
+.face-option {
+  position: relative;
+  padding: 7px 9px;
+  color: #e8d9a8;
+  text-align: left;
+  background: #3a2410;
+  border: 1px solid #7a4300;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.face-option:hover {
+  filter: brightness(1.15);
+}
+
+.face-option.active {
+  color: #fff3cf;
+  background: #5a3a1a;
+  border-color: #ffd24a;
+  box-shadow: inset 0 0 0 1px #ffd24a;
+}
+
+.face-option-name {
+  display: block;
+  padding-right: 14px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.face-option-hint {
+  display: block;
+  margin-top: 2px;
+  color: #b8a070;
+  font-size: 10px;
+  line-height: 1.25;
+}
+
+.face-option-check {
+  position: absolute;
+  top: 5px;
+  right: 7px;
+  color: #ffd24a;
+  font-weight: 700;
+}
+
+.face-menu-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 10px;
+  border-top: 1px solid #5a3a1a;
+}
+
+.face-menu-note {
+  color: #b8a070;
+  font-size: 10px;
+  line-height: 1.25;
+}
+
+.face-menu-done {
+  flex: 0 0 auto;
+  padding: 7px 14px;
+  color: #2b1a04;
+  font-size: 12px;
+  font-weight: 700;
+  background: linear-gradient(#ffe36a, #d9a400);
+  border: 2px solid #7a4300;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.face-menu-done:hover {
+  filter: brightness(1.08);
+}

@@ -1,7 +1,11 @@
 import { useState } from 'react';
 import { usePlayer } from '../store/playerStore';
 
-export default function SpeechBubble() {
+type SpeechBubbleProps = {
+  topOffset?: number;
+};
+
+export default function SpeechBubble({ topOffset = 0 }: SpeechBubbleProps) {
   const { message, setMessage } = usePlayer();
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(message);
@@ -13,7 +17,7 @@ export default function SpeechBubble() {
   };
 
   return (
-    <div className="bubble" onClick={() => !editing && setEditing(true)}>
+    <div className="bubble" style={{ top: topOffset }} onClick={() => !editing && setEditing(true)}>
       {editing ? (
         <>
           <textarea

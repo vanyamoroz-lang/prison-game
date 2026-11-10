@@ -1,5 +1,5 @@
 import { usePlayer } from '../store/playerStore';
-import Character from './Character';
+import CameraCharacter from './CameraCharacter';
 import LeftPanel from './LeftPanel';
 import LocationPanel from './LocationPanel';
 import ZonesPage from './ZonesPage';
@@ -28,7 +28,7 @@ export default function Scene() {
     <div className="scene">
       <div className="scene-view">
         {bg && <img key={location} className="scene-bg" src={bg} alt="" />}      
-        {location === 'camera' && <Character />}
+        {location === 'camera' && <CameraCharacter />}
         {location === 'yard' && <YardScene />}
         {location === 'catala' && <CatalaPage />}
         {location === 'poker' && <PokerPage onExit={() => setLocation('camera')} />}

@@ -1,0 +1,238 @@
+﻿{
+  "stage": {
+    "width": 1376,
+    "height": 768
+  },
+  "body": {
+    "src": "/assets/character/body.png",
+    "x": 0,
+    "y": 0,
+    "width": 1376,
+    "height": 768
+  },
+  "face": {
+    "eyes": {
+      "x": 668,
+      "y": 76,
+      "frameWidth": 128,
+      "frameHeight": 80,
+      "styles": {
+        "classic": {
+          "label": "РљР»Р°СЃСЃРёРєР°",
+          "src": "/assets/character/faces/eyes/classic.png",
+          "frames": 4,
+          "columns": 4,
+          "motion": "blink",
+          "blinkSequence": [
+            1,
+            2,
+            3,
+            0
+          ],
+          "blinkDurations": [
+            45,
+            80,
+            45,
+            25
+          ],
+          "blinkDelay": [
+            2400,
+            5200
+          ]
+        },
+        "angry": {
+          "label": "Р—Р»РѕСЃС‚СЊ",
+          "src": "/assets/character/faces/eyes/angry.png",
+          "frames": 4,
+          "columns": 4,
+          "motion": "blink",
+          "blinkSequence": [
+            1,
+            2,
+            3,
+            0
+          ],
+          "blinkDurations": [
+            45,
+            80,
+            45,
+            25
+          ],
+          "blinkDelay": [
+            2400,
+            5200
+          ]
+        },
+        "excited": {
+          "label": "Р’РѕСЃС‚РѕСЂРі",
+          "src": "/assets/character/faces/eyes/excited.png",
+          "frames": 4,
+          "columns": 4,
+          "motion": "blink",
+          "blinkSequence": [
+            1,
+            2,
+            3,
+            0
+          ],
+          "blinkDurations": [
+            45,
+            80,
+            45,
+            25
+          ],
+          "blinkDelay": [
+            2400,
+            5200
+          ]
+        },
+        "scar": {
+          "label": "РЁСЂР°Рј",
+          "src": "/assets/character/faces/eyes/scar.png",
+          "frames": 4,
+          "columns": 4,
+          "motion": "blink",
+          "blinkSequence": [
+            1,
+            2,
+            3,
+            0
+          ],
+          "blinkDurations": [
+            45,
+            90,
+            55,
+            35
+          ],
+          "blinkDelay": [
+            2500,
+            5000
+          ],
+          "blinkSide": "R"
+        },
+        "sly": {
+          "label": "РҐРёС‚СЂРѕСЃС‚СЊ",
+          "src": "/assets/character/faces/eyes/sly.png",
+          "frames": 2,
+          "columns": 2,
+          "motion": "glance",
+          "glanceDurations": [
+            1400,
+            900
+          ]
+        },
+        "sly2": {
+          "label": "РџРѕР»СѓРїСЂРёС‰СѓСЂ",
+          "src": "/assets/character/faces/eyes/sly2.png",
+          "frames": 4,
+          "columns": 4,
+          "motion": "blink",
+          "blinkSequence": [
+            1,
+            2,
+            3,
+            0
+          ],
+          "blinkDurations": [
+            45,
+            80,
+            45,
+            25
+          ],
+          "blinkDelay": [
+            2400,
+            5200
+          ]
+        },
+        "tired": {
+          "label": "РЈСЃС‚Р°Р»РѕСЃС‚СЊ",
+          "src": "/assets/character/faces/eyes/tired.png",
+          "frames": 4,
+          "columns": 4,
+          "motion": "blink",
+          "blinkSequence": [
+            1,
+            2,
+            3,
+            0
+          ],
+          "blinkDurations": [
+            110,
+            190,
+            140,
+            90
+          ],
+          "blinkDelay": [
+            5000,
+            9000
+          ]
+        }
+      }
+    },
+    "mouth": {
+      "x": 672,
+      "y": 138,
+      "frameWidth": 112,
+      "frameHeight": 64,
+      "styles": {
+        "classic": {
+          "label": "РќРµР№С‚СЂР°Р»СЊРЅС‹Р№",
+          "src": "/assets/character/faces/mouths/classic.png"
+        },
+        "smile": {
+          "label": "РЈР»С‹Р±РєР°",
+          "src": "/assets/character/faces/mouths/smile.png"
+        },
+        "evilsmile": {
+          "label": "Р—Р»Р°СЏ СѓР»С‹Р±РєР°",
+          "src": "/assets/character/faces/mouths/evilsmile.png"
+        }
+      }
+    },
+    "nose": {
+      "x": 680,
+      "y": 80,
+      "frameWidth": 96,
+      "frameHeight": 96,
+      "styles": {
+        "classic": {
+          "label": "РљР»Р°СЃСЃРёС‡РµСЃРєРёР№",
+          "src": "/assets/character/faces/noses/classic.png"
+        },
+        "broad": {
+          "label": "РЁРёСЂРѕРєРёР№",
+          "src": "/assets/character/faces/noses/broad.png"
+        },
+        "pointed": {
+          "label": "РћСЃС‚СЂС‹Р№",
+          "src": "/assets/character/faces/noses/pointed.png"
+        },
+        "button": {
+          "label": "РљРѕСЂРѕС‚РєРёР№",
+          "src": "/assets/character/faces/noses/button.png"
+        },
+        "broken": {
+          "label": "РЎР»РѕРјР°РЅРЅС‹Р№",
+          "src": "/assets/character/faces/noses/broken.png"
+        }
+      }
+    }
+  },
+  "hand": {
+    "x": 696,
+    "y": 392,
+    "frameWidth": 160,
+    "frameHeight": 208,
+    "pivot": {
+      "x": 84,
+      "y": 62
+    },
+    "sway": {
+      "src": "/assets/character/hand/sway.png",
+      "frames": 12,
+      "columns": 12,
+      "fps": 12,
+      "loop": true
+    }
+  }
+}
