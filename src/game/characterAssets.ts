@@ -90,12 +90,49 @@ export const NOSE_STYLES: StaticFaceStyle[] = [
   { id: 'broken', label: 'Сломанный', hint: 'Сросшийся перелом', src: asset('assets/character/faces/noses/broken.png') },
 ];
 
+export type HandKind = 'sway' | 'coin';
+
+export type HandStyle = {
+  id: HandKind;
+  label: string;
+  hint: string;
+  src: string;
+  frame: { width: number; height: number; x: number; y: number };
+  frames: number;
+  columns: number;
+  rows: number;
+  fps: number;
+};
+
 export const HAND = {
-  frame: { width: 160, height: 208, x: 696, y: 392 },
   sway: {
+    id: 'sway',
+    label: 'Стандартная рука',
+    hint: 'Покачивание',
     src: asset('assets/character/hand/sway.png'),
+    frame: { width: 160, height: 208, x: 696, y: 392 },
     frames: 12,
     columns: 12,
+    rows: 1,
     fps: 12,
   },
+  coin: {
+    id: 'coin',
+    label: 'Монетка',
+    hint: 'Подброс монеты',
+    src: asset('assets/character/hand/coin.png'),
+    frame: { width: 230, height: 560, x: 600, y: 40 },
+    frames: 46,
+    columns: 7,
+    rows: 7,
+    fps: 24,
+  },
+} as const satisfies Record<HandKind, HandStyle>;
+
+export const HAND_STYLES = [HAND.sway, HAND.coin] as const;
+
+export const HAND_UI = {
+  outfit: asset('assets/character/ui/outfit-icon.png'),
+  standard: asset('assets/character/ui/hand-icon.png'),
+  coin: asset('assets/character/ui/coin-icon.png'),
 } as const;

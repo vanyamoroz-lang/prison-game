@@ -1,13 +1,18 @@
 import { useState } from 'react';
 import Character from './Character';
 import FaceMenu from './FaceMenu';
+import Wardrobe from './Wardrobe';
 
 export default function CameraCharacter() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [wardrobeOpen, setWardrobeOpen] = useState(false);
 
   return (
     <>
-      <Character />
+      <Character
+        interactive
+        onActivate={() => setWardrobeOpen(true)}
+      />
       <button
         type="button"
         className="face-menu-trigger"
@@ -16,6 +21,7 @@ export default function CameraCharacter() {
         🎭 Сменить лицо
       </button>
       {menuOpen && <FaceMenu onClose={() => setMenuOpen(false)} />}
+      {wardrobeOpen && <Wardrobe onClose={() => setWardrobeOpen(false)} />}
     </>
   );
 }

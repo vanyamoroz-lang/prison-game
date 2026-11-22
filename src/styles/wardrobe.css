@@ -1,0 +1,503 @@
+/* ------------------------------------------------------------------ */
+/* Wardrobe                                                            */
+/* ------------------------------------------------------------------ */
+
+.wardrobe-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px;
+  background: rgba(0, 0, 0, 0.72);
+  font-family: Arial, sans-serif;
+}
+
+.wardrobe {
+  display: grid;
+  grid-template-columns: minmax(0, 1.42fr) minmax(330px, 0.9fr);
+  width: min(960px, 100%);
+  height: min(600px, 100%);
+  overflow: hidden;
+  color: #f5e6c8;
+  background: #1e1a15;
+  border: 3px solid #c89a3a;
+  border-radius: 12px;
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.62);
+}
+
+.wardrobe-room {
+  position: relative;
+  overflow: hidden;
+  background-color: #1b2a22;
+  background-position: center;
+  background-size: cover;
+  border-right: 3px solid #7a4300;
+}
+
+.wardrobe-room-shade {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, rgba(5, 8, 5, 0.36), transparent 22%, transparent 78%, rgba(5, 8, 5, 0.5)),
+    linear-gradient(180deg, rgba(5, 8, 5, 0.38), transparent 18%, transparent 72%, rgba(5, 8, 5, 0.6));
+}
+
+.wardrobe-room .character--preview {
+  z-index: 2;
+}
+
+.wardrobe-outfit {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  z-index: 5;
+  width: 66px;
+  height: 66px;
+  padding: 3px;
+  background: #f1e7d4;
+  border: 2px solid #c89a3a;
+  border-radius: 12px;
+  box-shadow: 0 5px 14px rgba(0, 0, 0, 0.5);
+  cursor: pointer;
+  transition: transform 130ms ease, box-shadow 130ms ease;
+}
+
+.wardrobe-outfit img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 9px;
+  object-fit: cover;
+  mix-blend-mode: multiply;
+}
+
+.wardrobe-outfit:hover,
+.wardrobe-outfit:focus-visible {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), 0 0 0 2px rgba(255, 210, 74, 0.35);
+}
+
+.wardrobe-tooltip {
+  position: absolute;
+  top: 50%;
+  left: calc(100% + 9px);
+  padding: 5px 9px;
+  color: #2b1a04;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+  background: #ffe8a8;
+  border: 1px solid #7a4300;
+  border-radius: 5px;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-50%) translateX(-4px);
+  transition: opacity 130ms ease, transform 130ms ease;
+}
+
+.wardrobe-tooltip::before {
+  position: absolute;
+  top: 50%;
+  right: 100%;
+  content: "";
+  border: 5px solid transparent;
+  border-right-color: #ffe8a8;
+  transform: translateY(-50%);
+}
+
+.wardrobe-outfit:hover .wardrobe-tooltip,
+.wardrobe-outfit:focus-visible .wardrobe-tooltip {
+  opacity: 1;
+  transform: translateY(-50%) translateX(0);
+}
+
+.wardrobe-room-caption {
+  position: absolute;
+  bottom: 76px;
+  left: 14px;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 4px 8px;
+  color: #e6d6ae;
+  font-size: 10px;
+  text-shadow: 0 1px 2px #000;
+  background: rgba(0, 0, 0, 0.46);
+  border-radius: 5px;
+}
+
+.wardrobe-actions {
+  position: absolute;
+  bottom: 14px;
+  left: 14px;
+  z-index: 6;
+  display: flex;
+  gap: 8px;
+}
+
+.wardrobe-round {
+  display: grid;
+  place-items: center;
+  width: 50px;
+  height: 50px;
+  padding: 0;
+  border: 3px solid rgba(0, 0, 0, 0.55);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: transform 120ms ease, filter 120ms ease;
+}
+
+.wardrobe-round svg {
+  width: 24px;
+  height: 24px;
+  fill: none;
+  stroke: #fff;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 3.4;
+  filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.35));
+}
+
+.wardrobe-round--cancel {
+  background: radial-gradient(circle at 34% 26%, #ff8074, #c92a1e 72%);
+  box-shadow: 0 6px 14px rgba(120, 20, 10, 0.5), inset 0 2px 2px rgba(255, 255, 255, 0.36);
+}
+
+.wardrobe-round--save {
+  background: radial-gradient(circle at 34% 26%, #b2f56e, #439e15 72%);
+  box-shadow: 0 6px 14px rgba(30, 90, 8, 0.5), inset 0 2px 2px rgba(255, 255, 255, 0.4);
+}
+
+.wardrobe-round:hover,
+.wardrobe-round:focus-visible {
+  transform: translateY(-2px) scale(1.04);
+}
+
+.wardrobe-round:active {
+  transform: translateY(0) scale(0.98);
+}
+
+.wardrobe-panel {
+  min-height: 0;
+  padding: 18px 18px 16px;
+  overflow-y: auto;
+  color: #ece2cf;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.045), transparent 30%),
+    #353531;
+  border-left: 1px solid rgba(255, 210, 74, 0.16);
+}
+
+.wardrobe-kicker {
+  margin: 0;
+  color: #c89a3a;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+}
+
+.wardrobe-panel-head h2 {
+  margin: 5px 0 6px;
+  color: #ffe8a8;
+  font-size: 24px;
+  line-height: 1.08;
+}
+
+.wardrobe-panel-head > p:last-child {
+  margin: 0;
+  color: #b8a98f;
+  font-size: 11.5px;
+  line-height: 1.45;
+}
+
+.wardrobe-parts {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  margin-top: 14px;
+}
+
+.wardrobe-part {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 9px;
+  color: #f0e4ca;
+  text-align: left;
+  background: #2a251e;
+  border: 1px solid #5a3a1a;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 120ms ease, border-color 120ms ease, transform 120ms ease;
+}
+
+.wardrobe-part:hover:not(:disabled) {
+  background: #3a2f22;
+  border-color: #c89a3a;
+  transform: translateX(2px);
+}
+
+.wardrobe-part--active {
+  background: #46351f;
+  border-color: #ffd24a;
+  box-shadow: inset 0 0 0 1px rgba(255, 210, 74, 0.4);
+}
+
+.wardrobe-part:disabled {
+  opacity: 0.48;
+  cursor: not-allowed;
+}
+
+.wardrobe-part-art {
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  overflow: hidden;
+  background: #f1e7d4;
+  border: 1px solid #7a4300;
+  border-radius: 7px;
+}
+
+.wardrobe-part-art img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.wardrobe-part-art span {
+  display: block;
+  width: 17px;
+  height: 17px;
+  background: linear-gradient(#d8c2a0, #b99d74);
+  border-radius: 50%;
+}
+
+.wardrobe-part-art--torso span {
+  width: 23px;
+  height: 19px;
+  border-radius: 6px;
+}
+
+.wardrobe-part-art--legs span {
+  width: 21px;
+  height: 23px;
+  border-radius: 4px 4px 8px 8px;
+}
+
+.wardrobe-part-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.wardrobe-part-copy strong {
+  font-size: 12px;
+}
+
+.wardrobe-part-copy small {
+  overflow: hidden;
+  color: #b8a98f;
+  font-size: 9.5px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.wardrobe-part-soon {
+  margin-left: auto;
+  padding: 2px 5px;
+  color: #a89778;
+  font-size: 8px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+}
+
+.wardrobe-items {
+  margin-top: 12px;
+}
+
+.wardrobe-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 0;
+  color: #d6b56e;
+  font-size: 11px;
+  font-weight: 700;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+}
+
+.wardrobe-back:hover {
+  color: #ffe8a8;
+}
+
+.wardrobe-item-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 5px;
+}
+
+.wardrobe-item {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: 8px;
+  color: #2b1d10;
+  background: #f1e7d4;
+  border: 1px solid #9a7a3a;
+  border-radius: 9px;
+  transition: border-color 120ms ease, box-shadow 120ms ease;
+}
+
+.wardrobe-item.is-active {
+  border-color: #d9a400;
+  box-shadow: 0 0 0 2px rgba(255, 210, 74, 0.3);
+}
+
+.wardrobe-item-art {
+  display: grid;
+  place-items: center;
+  height: 92px;
+  overflow: hidden;
+  background: #fffaf0;
+  border-radius: 6px;
+}
+
+.wardrobe-item-art img {
+  display: block;
+  width: 100%;
+  height: 92px;
+  object-fit: contain;
+}
+
+/* The game template has a global `img { height: auto }` rule and the art box
+   is a grid, so a percentage height resolves against an auto row. Use the
+   explicit box height to keep the card art inside its frame. */
+.wardrobe .wardrobe-item-art img {
+  height: 92px;
+}
+
+.wardrobe-item-art--coin img {
+  padding: 3px;
+  mix-blend-mode: multiply;
+}
+
+.wardrobe-item-copy h3 {
+  margin: 6px 0 1px;
+  color: #33220f;
+  font-size: 12px;
+  line-height: 1.1;
+}
+
+.wardrobe-item-copy p {
+  margin: 0;
+  color: #8b7355;
+  font-size: 9.5px;
+}
+
+.wardrobe-equip {
+  margin-top: 6px;
+  padding: 6px 8px;
+  color: #17330a;
+  font-size: 10.5px;
+  font-weight: 800;
+  background: linear-gradient(180deg, #b8f176 0%, #74ca32 62%, #5cab24 100%);
+  border: 1px solid #365f14;
+  border-radius: 6px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55), 0 2px 0 #3f7d15;
+  cursor: pointer;
+}
+
+.wardrobe-equip:hover {
+  filter: brightness(1.06);
+}
+
+.wardrobe-equip:active {
+  transform: translateY(1px);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45), 0 1px 0 #3f7d15;
+}
+
+.wardrobe-badge {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  padding: 2px 5px;
+  color: #f2ffe5;
+  font-size: 7.5px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  background: #3f7d18;
+  border-radius: 999px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
+}
+
+.wardrobe-hint {
+  margin: 10px 0 0;
+  color: #a89778;
+  font-size: 10px;
+  line-height: 1.4;
+}
+
+/* Compact and phone game frames */
+.frame--compact .wardrobe,
+.frame--phone .wardrobe {
+  grid-template-columns: 1fr;
+  grid-template-rows: 290px minmax(0, 1fr);
+  width: 100%;
+  height: 100%;
+  border-width: 2px;
+  border-radius: 0;
+}
+
+.frame--compact .wardrobe-room,
+.frame--phone .wardrobe-room {
+  border-right: 0;
+  border-bottom: 3px solid #7a4300;
+}
+
+.frame--phone .wardrobe {
+  grid-template-rows: 245px minmax(0, 1fr);
+}
+
+.frame--phone .wardrobe-item-grid {
+  grid-template-columns: 1fr;
+}
+
+.frame--phone .wardrobe-item-art {
+  height: 74px;
+}
+
+.frame--phone .wardrobe-item-art img {
+  height: 74px;
+}
+
+.frame--phone .wardrobe-panel {
+  padding: 14px 14px 12px;
+}
+
+.frame--phone .wardrobe-panel-head h2 {
+  font-size: 20px;
+}
+
+.frame--phone .wardrobe-outfit {
+  width: 54px;
+  height: 54px;
+}
+
+.frame--phone .wardrobe-room-caption {
+  display: none;
+}

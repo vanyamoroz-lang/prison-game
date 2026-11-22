@@ -16,6 +16,7 @@ interface PlayerState {
   face: number;
   mouth: number;
   nose: number;
+  hand: number;
   message: string;
   location: 'camera' | 'yard' | 'zones' | 'bosses' | 'catala' | 'poker' | 'collection';
   isLoading: boolean;
@@ -23,6 +24,7 @@ interface PlayerState {
   setFace: (n: number) => void;
   setMouth: (n: number) => void;
   setNose: (n: number) => void;
+  setHand: (n: number) => void;
   setMessage: (s: string) => void;
   setLocation: (l: PlayerState['location']) => void;
   /** Применяет к стору любой ответ сервера с данными игрока/баланса. */
@@ -96,6 +98,7 @@ export const usePlayer = create<PlayerState>((set, get) => ({
   face: 0,
   mouth: 0,
   nose: 0,
+  hand: 0,
   message: 'введи базар',
   location: 'camera',
   isLoading: true,
@@ -103,6 +106,7 @@ export const usePlayer = create<PlayerState>((set, get) => ({
   setFace: (face) => set({ face }),
   setMouth: (mouth) => set({ mouth }),
   setNose: (nose) => set({ nose }),
+  setHand: (hand) => set({ hand }),
   setMessage: (message) => set({ message: message.slice(0, 60) }),
   setLocation: (location) => set({ location }),
 
@@ -147,6 +151,7 @@ export const usePlayer = create<PlayerState>((set, get) => ({
       face: pickNumber(sources, ['face', 'face_id']) ?? state.face,
       mouth: pickNumber(sources, ['mouth', 'mouth_id']) ?? state.mouth,
       nose: pickNumber(sources, ['nose', 'nose_id']) ?? state.nose,
+      hand: pickNumber(sources, ['hand', 'hand_id', 'handId']) ?? state.hand,
     }));
   },
 
